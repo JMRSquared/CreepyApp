@@ -35,7 +35,7 @@
 
 <style scoped>
     ActionBar {
-        background-color: #c43c00;
+        background-color: #ff6d00;
         color: #ffffff;
     }
 
@@ -54,14 +54,14 @@
     .drawer-header {
         padding: 50 16 16 16;
         margin-bottom: 16;
-        background-color:#ffffff;
-        color: #c43c00;
+        background-color: #ff6d00;
+        color: #ffffff;
         font-size: 24;
     }
 
     .drawer-item {
         padding: 8 16;
-        color: #c43c00;
+        color: #ff6d00;
         font-size: 16;
     }
 </style>

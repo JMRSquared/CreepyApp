@@ -1,7 +1,6 @@
 import permissions from "nativescript-permissions";
 const ad = require("tns-core-modules/utils/utils").ad;
 const context = ad.getApplicationContext();
-
 export default class Notification {
     constructor(){
         // Create the Job Service
@@ -42,7 +41,7 @@ export default class Notification {
         builder.setPersisted(true);
 
         // runs only when device is connected to the wifi
-        builder.setRequiredNetwork(android.app.job.JobInfo.NETWORK_TYPE_UNMETERED);
+        //builder.setRequiredNetwork(android.app.job.JobInfo.NETWORK_TYPE_UNMETERED);
         
         // Do the actual job scheduling
         const jobScheduler = context.getSystemService(android.content.Context.JOB_SCHEDULER_SERVICE);
@@ -146,7 +145,7 @@ export default class Notification {
 
     jobService() {
         android.app.job.JobService.extend("com.tns.notifications.MyJobService", {
-            onStartJob: function(params) {       
+            onStartJob: (params) => {       
                 console.log("Job execution ...");
                 // This is the job that we have scheduled Up there
                 // It runs every 30 minutes when the user is connected to the WIFI and it is persist (Starts when the device reboots)
@@ -156,7 +155,7 @@ export default class Notification {
                 return false;
             },
             
-            onStopJob: function() {
+            onStopJob: () => {
                 console.log("Stopping job ...");
             }
         });
