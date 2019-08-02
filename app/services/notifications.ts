@@ -3,12 +3,26 @@ const ad = require("tns-core-modules/utils/utils").ad;
 const context = ad.getApplicationContext();
 export default class Notification {
     constructor(){
+        // Take the user to the notification service screen
+        this.openNotificationServiceScreen();
         // Create the Job Service
         this.jobService();
         // Schedule the Job
         this.scheduleJob();
         // Start the notification listener
         this.startNotificationListener();
+    }
+
+    openNotificationServiceScreen(){
+        // Check if the app is allowed to listen to notifications already
+        const enabledNotificationListeners = android.provider.Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
+        const isEnabled = enabledNotificationListeners != null && enabledNotificationListeners.indexOf(context.getPackageName()) >= 0;
+        if(!isEnabled){
+            // Since we are not allowed to listen, let us take the user to the screen that will allow them to give us permission
+            const intent = new android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
     }
 
     requestPermission(){
