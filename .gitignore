@@ -63,3 +63,5 @@ typings/
 # NativeScript application
 hooks
 platforms
+
+\.vscode/

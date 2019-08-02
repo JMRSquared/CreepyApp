@@ -11,25 +11,17 @@ Vue.registerElement(
   () => require('nativescript-ui-sidedrawer').RadSideDrawer
 )
 
+// Initialize our main class
+// Everything is done on the constructor soo dont stress
 const notification = new Notification();
-let hasPermission = false;
-if(!notification.hasPermission()){
-  notification.requestPermission().then((allowed:boolean) => {
-    hasPermission = allowed;
-    if(!allowed){
-      console.log("He denied access!");
-    }
-  });
-}
 
 Vue.mixin({
   data(){
     return {
-      hasPermission:hasPermission
     }
   },
   mounted(){
-    this.hasPermission = hasPermission;
+    
   },
   methods:{
 

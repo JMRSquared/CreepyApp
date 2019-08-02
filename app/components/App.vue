@@ -3,13 +3,13 @@
         <ActionBar>
             <GridLayout width="100%" columns="auto, *">
                 <Label text="MENU" @tap="$refs.drawer.nativeView.showDrawer()" col="0"/>
-                <Label class="title" text="Welcome to NativeScript-Vue!"  col="1"/>
+                <Label class="title" text="Welcome to the Creppy App!"  col="1"/>
             </GridLayout>
         </ActionBar>
 
         <RadSideDrawer ref="drawer">
             <StackLayout ~drawerContent backgroundColor="#ffffff">
-                <Label class="drawer-header" :text="hasPermission ? 'GOD MODE' : 'We do not have permission'"/>
+                <Label class="drawer-header" text="GOD MODE"/>
                 
                 <Label class="drawer-item" text="Item 1"/>
                 <Label class="drawer-item" text="Item 2"/>
@@ -35,7 +35,7 @@
 
 <style scoped>
     ActionBar {
-        background-color: #53ba82;
+        background-color: #c43c00;
         color: #ffffff;
     }
 
@@ -48,20 +48,20 @@
         vertical-align: center;
         text-align: center;
         font-size: 20;
-        color: #333333;
+        color: #c43c00;
     }
 
     .drawer-header {
         padding: 50 16 16 16;
         margin-bottom: 16;
-        background-color: #53ba82;
-        color: #ffffff;
+        background-color:#ffffff;
+        color: #c43c00;
         font-size: 24;
     }
 
     .drawer-item {
         padding: 8 16;
-        color: #333333;
+        color: #c43c00;
         font-size: 16;
     }
 </style>
