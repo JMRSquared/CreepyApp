@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "352258811553",
+    "firebase_url": "https://creepyapp-69c32.firebaseio.com",
+    "project_id": "creepyapp-69c32",
+    "storage_bucket": "creepyapp-69c32.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352258811553:android:d6c6ee8d77426126",
+        "android_client_info": {
+          "package_name": "com.jmrsquared.creepy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352258811553-vrtqh1evk4amh60mm6e8ijkgrj41dis5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRev6abwgjjJuTeVb-aY0rUJN6Bhb60KE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352258811553-vrtqh1evk4amh60mm6e8ijkgrj41dis5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352258811553:android:d69551a757d901b6",
+        "android_client_info": {
+          "package_name": "com.jmrsquared.creepyapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352258811553-vrtqh1evk4amh60mm6e8ijkgrj41dis5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRev6abwgjjJuTeVb-aY0rUJN6Bhb60KE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352258811553-vrtqh1evk4amh60mm6e8ijkgrj41dis5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

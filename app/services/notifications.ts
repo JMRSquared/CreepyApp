@@ -87,9 +87,6 @@ export default class Notification {
                                 // We obvious want to loop through all of them and push them in an array
                                 body.push(extraMessages[i].getString("text"));
                             }
-                        }else{
-                            body.push('----------------');
-                            console.log("---- WE DO NOT HAVE EXTRA MESSAGES");
                         }
                     }else{  
                         // This is just one massage from old android versions 7-

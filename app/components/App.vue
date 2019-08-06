@@ -2,8 +2,8 @@
     <Page>
         <ActionBar>
             <GridLayout width="100%" columns="auto, *">
-                <Label text="MENU" @tap="$refs.drawer.nativeView.showDrawer()" col="0"/>
-                <Label class="title" text="Welcome to the Creppy App!"  col="1"/>
+                <Label :text="'mdi-menu' | fonticon" verticalAlignment="center" :fontSize="30" class="mdi" @tap="$refs.drawer.nativeView.showDrawer()" col="0"/>
+                <Label class="title" verticalAlignment="center" text="Welcome to the Creppy App!"  col="1"/>
             </GridLayout>
         </ActionBar>
 
@@ -11,9 +11,26 @@
             <StackLayout ~drawerContent backgroundColor="#ffffff">
                 <Label class="drawer-header" text="GOD MODE"/>
                 
-                <Label class="drawer-item" text="Item 1"/>
-                <Label class="drawer-item" text="Item 2"/>
-                <Label class="drawer-item" text="Item 3"/>
+                <GridLayout class="drawer-item" rows="auto,auto" columns="auto,*">
+                    <Label :text="'mdi-target-account' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
+                    <Label text="Session ID " class="t-14" col="1"/>
+                    <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
+                </GridLayout>
+                <GridLayout class="drawer-item" rows="auto,auto" columns="auto,*">
+                    <Label :text="'mdi-account-plus-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
+                    <Label text="Link to session " class="t-14" col="1"/>
+                    <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
+                </GridLayout>
+                <Label class="drawer-item text-light-orange font-weight-bold" text="Victims"/>
+                <ScrollView>
+                    <StackLayout>
+                        <GridLayout v-for="a in 5" :key="a" class="p-x-15 p-y-5" rows="auto,auto" columns="auto,*">
+                            <Label :text="'mdi-account-circle-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
+                            <Label text="Sirwali Joseph" class="t-14" col="1"/>
+                            <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
+                        </GridLayout>
+                    </StackLayout>
+                </ScrollView>
             </StackLayout>
 
             <GridLayout ~mainContent columns="*" rows="*">
@@ -61,7 +78,6 @@
 
     .drawer-item {
         padding: 8 16;
-        color: #ff6d00;
         font-size: 16;
     }
 </style>
