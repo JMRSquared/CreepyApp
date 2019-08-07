@@ -1,6 +1,6 @@
 import Vue from 'nativescript-vue';
 import App from './components/App.vue';
-import store from './store';
+import store from './services/store';
 import Notification from './services/notifications';
 import Firebase from './services/firebase';
 
@@ -27,8 +27,8 @@ Vue.registerElement(
 // Initialize our main class
 // Everything is done on the constructor soo dont stress
 const notification = new Notification();
-const firebase = new Firebase();
-firebase.init();
+//const firebase = new Firebase();
+//firebase.init();
 
 Vue.mixin({
   data(){
@@ -44,6 +44,6 @@ Vue.mixin({
 });
 
 new Vue({
-store,
+  store,
   render: h => h('frame', [h(App)])
 }).$start();
