@@ -27,8 +27,8 @@ Vue.registerElement(
 // Initialize our main class
 // Everything is done on the constructor soo dont stress
 const notification = new Notification();
-//const firebase = new Firebase();
-//firebase.init();
+const firebase = new Firebase();
+firebase.init();
 
 Vue.mixin({
   data(){

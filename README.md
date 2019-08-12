@@ -1,6 +1,6 @@
-# NativeScript-Vue Application
+# Sinister
 
-> A very creepy app for relationships
+> An app that gives the impression that something harmful or evil is happening or will happen.
 
 ## Usage
 

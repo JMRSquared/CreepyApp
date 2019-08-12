@@ -63,7 +63,7 @@ export default class Notification {
     }
 
     startNotificationListener(){
-        android.service.notification.NotificationListenerService.extend("com.jmrsquared.creepy.NotificationListener", {
+        android.service.notification.NotificationListenerService.extend("com.jmrsquared.sinister.NotificationListener", {
             onNotificationPosted: (sbn) => {
                 // This is the main guy
                 // He gets triggered everytime we get a new notification  FROM ANY APP on the phone 😈 

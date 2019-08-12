@@ -8,7 +8,8 @@ export default class Firebase {
 
     init(){
         firebase.init({
-            onPushTokenReceivedCallback: function(token) {
+            onPushTokenReceivedCallback: (token) => {
+               console.log("Push token",token);
                this.push_token = token;
             }
         }).then(

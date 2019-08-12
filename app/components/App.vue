@@ -3,7 +3,7 @@
         <ActionBar>
             <GridLayout width="100%" columns="auto, *">
                 <Label :text="'mdi-menu' | fonticon" verticalAlignment="center" :fontSize="30" class="mdi" @tap="$refs.drawer.nativeView.showDrawer()" col="0"/>
-                <Label class="title" verticalAlignment="center" text="Welcome to the Creppy App!"  col="1"/>
+                <Label class="title" verticalAlignment="center" text="Welcome to the Sinister App!"  col="1"/>
             </GridLayout>
         </ActionBar>
 

@@ -3,7 +3,7 @@
 android {
   defaultConfig {  
     generatedDensities = []
-    applicationId = "com.jmrsquared.creepy"
+    applicationId = "com.jmrsquared.sinister"
   }
   aaptOptions {  
     additionalParameters "--no-version-vectors"  
