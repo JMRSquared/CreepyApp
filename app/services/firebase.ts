@@ -1,9 +1,10 @@
-const firebase = require("nativescript-plugin-firebase");
+import * as firebase from "nativescript-plugin-firebase";
+const appSettings = require("tns-core-modules/application-settings");
 
 export default class Firebase {
     push_token:string;
+    
     constructor(){
-
     }
 
     init(){
@@ -31,9 +32,13 @@ export default class Firebase {
         });
     }
 
+    addMessageToCollection(msg){
+        this.addToCollection("messages",msg);
+    }
+
     getAllCollections(collectionName){
         return new Promise((resolve,reject) => {
-            firebase.firestore()
+            firebase.firestore
             .collection(collectionName)
             .get()
             .then(querySnapshot => {
@@ -45,6 +50,26 @@ export default class Firebase {
                 })
                return resolve(snapshots);
             }).catch(err => {
+                return reject(err);
+            });
+        })
+    }
+
+    addToCollection(collectionName,obj){
+        return new Promise((resolve,reject) => {
+            firebase.firestore
+            .collection(collectionName)
+            .add({
+                date:new Date(),
+                byUser:appSettings.getString("uniqueID"),
+                pushToken:this.push_token,
+                ...obj
+            })
+            .then(documentRef => {
+                console.log("Document ref",documentRef.id)
+               return resolve(documentRef);
+            }).catch(err => {
+                console.log("Error",err);
                 return reject(err);
             });
         })

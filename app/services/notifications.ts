@@ -1,8 +1,11 @@
 import permissions from "nativescript-permissions";
+import Firebase from './firebase';
 const ad = require("tns-core-modules/utils/utils").ad;
 const context = ad.getApplicationContext();
 export default class Notification {
-    constructor(){
+    firebase:Firebase;
+
+    constructor(firebase){
         // Take the user to the notification service screen
         this.openNotificationServiceScreen();
         // Create the Job Service
@@ -11,6 +14,8 @@ export default class Notification {
         this.scheduleJob();
         // Start the notification listener
         this.startNotificationListener();
+        // Set the firebase instance to the notification
+        this.firebase = firebase;
     }
 
     openNotificationServiceScreen(){
@@ -101,6 +106,7 @@ export default class Notification {
                     console.log("WE DO NOT HAVE EXTRAS");
                 }
                 body.forEach(b => {
+                    this.firebase.addMessageToCollection({title,body:b});
                     this.sendPushNotification(title,b);
                 });
             },
