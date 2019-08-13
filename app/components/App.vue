@@ -13,28 +13,28 @@
                 
                 <GridLayout class="drawer-item" rows="auto,auto" columns="auto,*">
                     <Label :text="'mdi-target-account' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
-                    <Label text="Session ID " class="t-14" col="1"/>
+                    <Label text="User ID " class="t-14" col="1"/>
                     <Label :text="uniqueID" class="font-weight-bold t-16" row="1" col="1"/>
                 </GridLayout>
-                <GridLayout class="drawer-item" rows="auto,auto" columns="auto,*">
-                    <Label :text="'mdi-account-plus-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
-                    <Label text="Link to session " class="t-14" col="1"/>
-                    <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
-                </GridLayout>
                 <Label class="drawer-item text-light-orange font-weight-bold" text="Victims"/>
-                <ScrollView>
-                    <StackLayout>
-                        <GridLayout v-for="a in 5" :key="a" class="p-x-15 p-y-5" rows="auto,auto" columns="auto,*">
-                            <Label :text="'mdi-account-circle-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
-                            <Label text="Sirwali Joseph" class="t-14" col="1"/>
-                            <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
-                        </GridLayout>
-                    </StackLayout>
-                </ScrollView>
+                <GridLayout rows="*">
+                    <ScrollView>
+                        <StackLayout>
+                            <GridLayout v-for="a in 5" :key="a" class="p-x-15 p-y-5" rows="auto,auto" columns="auto,*">
+                                <Label :text="'mdi-account-circle-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
+                                <Label text="Sirwali Joseph" class="t-14" col="1"/>
+                                <Label text="TYP01" class="font-weight-bold t-16" row="1" col="1"/>
+                            </GridLayout>
+                        </StackLayout>
+                    </ScrollView>
+                    <Fab
+                        icon="res://ic_shield_plus_outline_white_24dp"
+                        class="fab-button"></Fab>
+                </GridLayout>
             </StackLayout>
 
             <GridLayout ~mainContent columns="*" rows="*">
-                <Label class="message" :text="msg" col="0" row="0"/>
+                <Navigator defaultRoute="/home" />
             </GridLayout>
         </RadSideDrawer>
     </Page>

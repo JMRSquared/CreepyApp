@@ -3,6 +3,8 @@ import App from './components/App.vue';
 import store from './services/store';
 import Notification from './services/notifications';
 import Firebase from './services/firebase';
+import routes from "./services/router";
+import Navigator from "nativescript-vue-navigator";
 const appSettings = require("tns-core-modules/application-settings");
 
 import {
@@ -23,7 +25,12 @@ Vue.config.silent = (TNS_ENV === 'production');
 Vue.registerElement(
   'RadSideDrawer',
   () => require('nativescript-ui-sidedrawer').RadSideDrawer
-)
+);
+
+Vue.registerElement(
+  'Fab',
+  () => require('@nstudio/nativescript-floatingactionbutton').Fab
+);
 
 // Initialize our main class
 // Everything is done on the constructor soo dont stress
@@ -38,6 +45,9 @@ if(!appSettings.getString("uniqueID")){
 const firebase = new Firebase();
 firebase.init();
 const notification = new Notification(firebase);
+Vue.use(Navigator, {
+  routes
+});
 
 Vue.mixin({
   data(){

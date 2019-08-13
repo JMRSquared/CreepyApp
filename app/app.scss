@@ -13,6 +13,15 @@
     font-family: "Material Design Icons",
       "materialdesignicons";
 }
+
+.fab-button {
+    height: 50;
+    width: 50; /// this is required on iOS - Android does not require width so you might need to adjust styles
+    margin: 15;
+    background-color: #ff6d00;
+    horizontal-align: right;
+    vertical-align: bottom;
+}
   
 .text-light-orange{
     color:#ff6d00
