@@ -1,9 +1,14 @@
 // Add your native dependencies here:
+dependencies {
+  implementation 'com.android.support:multidex:1.0.3'
+}
 
 android {
   defaultConfig {  
     generatedDensities = []
+    minSdkVersion 21 
     applicationId = "com.jmrsquared.sinister"
+    multiDexEnabled true
   }
   aaptOptions {  
     additionalParameters "--no-version-vectors"  

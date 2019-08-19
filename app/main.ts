@@ -32,6 +32,16 @@ Vue.registerElement(
   () => require('@nstudio/nativescript-floatingactionbutton').Fab
 );
 
+Vue.registerElement(
+  'Ripple',
+   () => require("nativescript-ripple").Ripple
+);
+
+Vue.registerElement(
+  'CardView',
+   () => require("@nstudio/nativescript-cardview").CardView
+);
+
 // Initialize our main class
 // Everything is done on the constructor soo dont stress
 if(!appSettings.getString("uniqueID")){
@@ -52,18 +62,44 @@ Vue.use(Navigator, {
 Vue.mixin({
   data(){
     return {
-      uniqueID:appSettings.getString("uniqueID")
+      uniqueID:appSettings.getString("uniqueID"),
+      currentPage: 0,
+      victims:[]
     }
   },
   mounted(){
-    
+    this.victims = this.$store.commit("loadVictims");
   },
   methods:{
+    navigate(to, props = null, options = null) {
+      if (to == null) {
+        if (this.currentPage && this.currentPage > 0 && !props) {
+          this.currentPage--;
+        } else {
+          this.$navigator.back();
+        }
+      } else {
+        options = options || {};
+        options.props = props;
+        if (this.$navigator.route && this.$navigator.route.path == to) {
+          console.log("Going to same page", to);
+          return;
+        }
 
+        this.$navigator.navigate(to, options);
+      }
+    },
+    addNewVictim(userId,displayName){
+      this.$store.commit("addVictim",{
+        userId,
+        displayName
+      });
+      this.victims = this.$store.commit("loadVictims");
+    }
   }
 });
 
 new Vue({
   store,
-  render: h => h('frame', [h(App)])
+  render: h => h(App)
 }).$start();

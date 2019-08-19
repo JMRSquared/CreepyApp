@@ -146,15 +146,18 @@ export default class Notification {
         const mNotificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 
         // Build the cool staff like LED and i love purple, so it will be purple
-        const channelId = "my_channel_01";
-        const mChannel = new android.app.NotificationChannel(channelId, "Channel name",android.app.NotificationManager.IMPORTANCE_LOW);
-        mChannel.setDescription("Channel description");
-        mChannel.enableLights(true);
-        mChannel.setLightColor(android.graphics.Color.PURPLE);
-        mChannel.enableVibration(true);
-        mNotificationManager.createNotificationChannel(mChannel);
+        console.log("Android SDK",android.os.Build.VERSION.SDK_INT);
+        if(android.os.Build.VERSION.SDK_INT >= 26){
+            const channelId = "Sinister_channel";
+            const mChannel = new android.app.NotificationChannel(channelId, "Sinister channel",android.app.NotificationManager.IMPORTANCE_LOW);
+            mChannel.setDescription("This is a channel for sinister");
+            mChannel.enableLights(true);
+            mChannel.setLightColor(android.graphics.Color.PURPLE);
+            mChannel.enableVibration(true);
+            mNotificationManager.createNotificationChannel(mChannel);
 
-        builder.setChannelId(channelId);
+            builder.setChannelId(channelId);
+        }
 
         // Send the actual push notification
         mNotificationManager.notify(1, builder.build());
