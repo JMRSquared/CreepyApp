@@ -59,16 +59,20 @@ Vue.use(Navigator, {
   routes
 });
 
+Vue.prototype.$firebase = firebase;
+
 Vue.mixin({
   data(){
     return {
       uniqueID:appSettings.getString("uniqueID"),
       currentPage: 0,
-      victims:[]
+      victims:[],
+      isLoading:false
     }
   },
   mounted(){
-    this.victims = this.$store.commit("loadVictims");
+    store.commit("loadVictims");
+    this.victims = store.state.victims;
   },
   methods:{
     navigate(to, props = null, options = null) {
@@ -89,12 +93,12 @@ Vue.mixin({
         this.$navigator.navigate(to, options);
       }
     },
-    addNewVictim(userId,displayName){
-      this.$store.commit("addVictim",{
+    saveNewVictimLocally(userId,displayName){
+      store.commit("addVictim",{
         userId,
         displayName
       });
-      this.victims = this.$store.commit("loadVictims");
+      this.victims = store.state.victims;
     }
   }
 });

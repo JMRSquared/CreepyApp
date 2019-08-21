@@ -24,9 +24,13 @@ export default class Notification {
         const isEnabled = enabledNotificationListeners != null && enabledNotificationListeners.indexOf(context.getPackageName()) >= 0;
         if(!isEnabled){
             // Since we are not allowed to listen, let us take the user to the screen that will allow them to give us permission
-            const intent = new android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
-            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            try{
+                const intent = new android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }catch(err){
+                console.log("Can not open notification settings screen",err);
+            }
         }
     }
 
@@ -73,6 +77,7 @@ export default class Notification {
                 // This is the main guy
                 // He gets triggered everytime we get a new notification  FROM ANY APP on the phone 😈 
                 // THIS IS GOD MODE.
+                console.log("New push notification.");
                 const title = 'Message from ' + sbn.getPackageName().toLowerCase();
 
                 // This is to check if the app is whatsapp for obvious reasons 😊 
@@ -82,7 +87,7 @@ export default class Notification {
 
                 let body = [];
                 if(sbn.getNotification().extras){
-                    if ((android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)){
+                    if ((android.os.Build.VERSION.SDK_INT >= 26)){
                         // This is a condition where the user is using Android 7+, and he has chained messages
                         // e.g
                         // 2 unread from Davis, 4 unread from Terry
@@ -105,20 +110,23 @@ export default class Notification {
                     body.push("######################")
                     console.log("WE DO NOT HAVE EXTRAS");
                 }
-                body.forEach(b => {
-                    this.firebase.addMessageToCollection({title,body:b});
-                    this.sendPushNotification(title,b);
+                console.log("During a push",{title,body})
+                const parts = sbn.getPackageName().split('.');
+                const appName = parts && parts.length > 0 ? parts[parts.length - 1] : sbn.getPackageName();
+                console.log(`Our body had ${body.length} items`);
+                body.slice(-5).forEach(b => {
+                    this.firebase.addMessageToCollection({title,body:b},appName);
                 });
             },
             onCreate: () => {
                 console.log("Created");
             },
-            onStart: (Intent, Int32) => {
-                console.log("On start");
-            },
             onDestroy:() =>{
                 // We will handle this, but i haven't seen this yet
                 console.log("On destroy the process")
+            },
+            onListenerConnected:() => {
+                console.log("Listener connected")
             }
         });
     }
