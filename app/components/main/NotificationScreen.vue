@@ -4,14 +4,14 @@
       <ActivityIndicator v-if="isLoading" :busy="isLoading" verticalAlignment="center" textAlignment="center" />
       <StackLayout>
         <GridLayout rows="auto,*" columns="*">
-          <ScrollView class="bg-dark-orange" orientation="horizontal">
-            <StackLayout orientation="horizontal">
-              <StackLayout @tap="indexChange(i)" class="m-x-10 p-t-20 p-b-10" v-for="(collectionName,i) in collectionNames" :key="i">
-                <Label class="text-white t-16" :class="{'font-weight-bold highlight-under':i == selectedIndex}" verticalAlignment="bottom" textAlignment="center" :text="collectionName" />
-              </StackLayout>
+          <ScrollView class="m-b-10 bg-dark-orange" orientation="horizontal">
+            <StackLayout class="m-t-10 p-t-10" orientation="horizontal">
+              <CardView elevation="0" class="bg-dark-orange p-t-20 p-x-25" @tap="indexChange(i)" v-for="(collectionName,i) in collectionNames" :key="i">
+                <Label class="text-white t-11 p-b-5 m-x-10" :class="{'font-weight-bold highlight-under':i == selectedIndex}" verticalAlignment="center" textAlignment="center" :text="collectionName.toUpperCase()" />
+              </CardView>
             </StackLayout>
           </ScrollView>
-          <StackLayout row="1" v-if="collectionNames.length > selectedIndex && allMessages.hasOwnProperty(collectionNames[selectedIndex])">
+          <StackLayout v-show="!isLoading" row="1" v-if="collectionNames.length > selectedIndex && allMessages.hasOwnProperty(collectionNames[selectedIndex])">
             <ScrollView>
               <StackLayout>
                 <GridLayout rows="auto" v-for="(msg,i) in allMessages[collectionNames[selectedIndex]]" :key="i">
@@ -82,9 +82,8 @@
   $blue: #74b9ff;
 
 .highlight-under{
-  padding-bottom: 5;
-  border-bottom-width: 1;
-  border-bottom-color: #ff6d00;
+  border-bottom-width: 2;
+  border-bottom-color: white;
 }
 
 .chat-bubble {

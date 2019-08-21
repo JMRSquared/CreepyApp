@@ -1,7 +1,7 @@
 <template>
     <Page>
         <GridLayout rows="auto,*" columns="*">
-            <CardView elevation="5" row="0">
+            <CardView elevation="0" row="0">
                 <GridLayout class="top-nav" width="100%" columns="auto,*,auto">
                     <Label :text="'mdi-menu' | fonticon" verticalAlignment="center" :fontSize="30" class="mdi" @tap="$refs.drawer.nativeView.toggleDrawerState()" col="0"/>
                     <Label class="title" verticalAlignment="center" text="Sinister!"  col="1"/>        
@@ -37,7 +37,7 @@
                     </GridLayout>
                 </StackLayout>
 
-                <GridLayout ~mainContent class="m-t-5" columns="*" rows="auto,*">
+                <GridLayout ~mainContent columns="*" rows="auto,*">
                     <Navigator row="1" defaultRoute="/home" />
                 </GridLayout>
             </RadSideDrawer>
