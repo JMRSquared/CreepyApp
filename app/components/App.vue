@@ -4,7 +4,7 @@
             <CardView elevation="0" row="0">
                 <GridLayout class="top-nav" width="100%" columns="auto,*,auto">
                     <Label :text="'mdi-menu' | fonticon" verticalAlignment="center" :fontSize="30" class="mdi" @tap="$refs.drawer.nativeView.toggleDrawerState()" col="0"/>
-                    <Label class="title" verticalAlignment="center" text="Sinister!"  col="1"/>        
+                    <Label class="title" verticalAlignment="center" :text="`Sinister${selectedVictim ? ` - ${selectedVictim.displayName}` : ''}!`"  col="1"/>        
                     <Label @tap="goHomeClear()" :text="'mdi-home-outline' | fonticon" col="2" verticalAlignment="center" :fontSize="30" class="mdi"/>
                 </GridLayout>
             </CardView>
@@ -15,11 +15,14 @@
                         <Label text="User ID " class="t-16" col="1"/>
                         <Label :text="uniqueID" class="font-weight-bold t-18" row="1" col="1"/> 
                    </GridLayout>
-                    <Label class="drawer-item text-light-orange font-weight-bold" text="Victims"/>
+                    <GridLayout rows="auto" columns="*,auto">
+                        <Label class="drawer-item text-light-orange font-weight-bold" text="Victims"/>
+                        <Label @tap="loadVictims" col="1" :text="'mdi-refresh' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="30" class="mdi m-10"/>
+                    </GridLayout>
                     <GridLayout class="drawer-item" rows="*">
                         <ScrollView>
                             <StackLayout>
-                                <Ripple v-for="(victim,i) in victims" :key="i" @tap="goToNotificationScreen(victim.userId)">
+                                <Ripple v-for="(victim,i) in victims" :key="i" @tap="goToNotificationScreen(victim)">
                                     <GridLayout class="p-5" rows="auto,auto,auto" columns="auto,*,auto">
                                         <Label :text="'mdi-account-circle-outline' | fonticon" rowSpan="2" verticalAlignment="center" :fontSize="25" class="mdi m-10"/>
                                         <Label :text="victim.displayName" class="t-14" col="1"/>
@@ -50,11 +53,13 @@
   export default {
     data() {
       return {
-        msg: 'Hello World!'
+        msg: 'Hello World!',
+        selectedVictim:null
       }
     },
     mounted(){
         console.log("Global vics",this.victims);
+        this.selectedVictim = null;
     },
     methods:{
         goHomeClear(){
@@ -62,10 +67,11 @@
                 clearHistory:true
             });
         },
-        goToNotificationScreen(victimID){
+        goToNotificationScreen(victim){
+            this.selectedVictim = victim;
             this.$refs.drawer.nativeView.closeDrawer();
             this.navigate("/notification/screen",{
-                victimID
+                victimID:victim.userId
             })
         },
         async addNewVictim(){

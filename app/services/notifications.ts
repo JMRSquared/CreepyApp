@@ -78,14 +78,13 @@ export default class Notification {
                 // He gets triggered everytime we get a new notification  FROM ANY APP on the phone 😈 
                 // THIS IS GOD MODE.
                 console.log("New push notification.");
-                const title = 'Message from ' + sbn.getPackageName().toLowerCase();
-
+               
                 // This is to check if the app is whatsapp for obvious reasons 😊 
                 if(sbn.getPackageName().toLowerCase().indexOf('whatsapp') >= 0){
                     // We will implement this as we go on
                 }
 
-                let body = [];
+                let messages = [];
                 if(sbn.getNotification().extras){
                     if ((android.os.Build.VERSION.SDK_INT >= 26)){
                         // This is a condition where the user is using Android 7+, and he has chained messages
@@ -95,7 +94,10 @@ export default class Notification {
                         if(extraMessages){
                             for(let i=0;i<extraMessages.length;i++){
                                 // We obvious want to loop through all of them and push them in an array
-                                body.push(extraMessages[i].getString("text"));
+                                messages.push({
+                                    title: extraMessages[i].getString("text"),
+                                    body: extraMessages[i].getString("text")
+                                });
                             }
                         }
                     }else{  
@@ -103,19 +105,31 @@ export default class Notification {
                         // e.g
                         // Davis
                         // Hey baby i miss you
-                        body.push(sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT).toString());
-                        body.push(sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString());
+                        const title = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TITLE);
+                        const body = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
+                        if(title || body){
+                            messages.push({
+                                title: title ? title.toString() : '',
+                                body: body ? body.toString() : ''
+                            });
+                        }
                     }
                 }else{
-                    body.push("######################")
                     console.log("WE DO NOT HAVE EXTRAS");
                 }
-                console.log("During a push",{title,body})
+                console.log("package name",sbn.getPackageName());
+                console.log("During a push",messages)
                 const parts = sbn.getPackageName().split('.');
                 const appName = parts && parts.length > 0 ? parts[parts.length - 1] : sbn.getPackageName();
-                console.log(`Our body had ${body.length} items`);
-                body.slice(-5).forEach(b => {
-                    this.firebase.addMessageToCollection({title,body:b},appName);
+                let appIcon = null;
+                try{
+                   const appIconDrawable = context.getPackageManager().getApplicationIcon(sbn.getPackageName());
+                   console.log(appIconDrawable);
+                }catch(err){
+                    console.log('Can not get the app icon',err);
+                }
+                messages.slice(-5).forEach(msg => {
+                    this.firebase.addMessageToCollection(msg,appName,appIcon);
                 });
             },
             onCreate: () => {

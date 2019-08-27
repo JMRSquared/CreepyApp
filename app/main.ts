@@ -5,6 +5,7 @@ import Notification from './services/notifications';
 import Firebase from './services/firebase';
 import routes from "./services/router";
 import Navigator from "nativescript-vue-navigator";
+import moment from 'moment';
 const appSettings = require("tns-core-modules/application-settings");
 
 import {
@@ -42,6 +43,11 @@ Vue.registerElement(
    () => require("@nstudio/nativescript-cardview").CardView
 );
 
+Vue.registerElement(
+  'MaterialDropdownList',
+   () => require("nativescript-materialdropdownlist").MaterialDropdownList
+);
+
 // Initialize our main class
 // Everything is done on the constructor soo dont stress
 if(!appSettings.getString("uniqueID")){
@@ -71,10 +77,16 @@ Vue.mixin({
     }
   },
   mounted(){
-    store.commit("loadVictims");
-    this.victims = store.state.victims;
+    this.loadVictims();
   },
   methods:{
+    loadVictims(){
+      store.commit("loadVictims");
+      this.victims = store.state.victims;
+    },
+    getMoment(value = null){
+      return moment(value)
+    },
     navigate(to, props = null, options = null) {
       if (to == null) {
         if (this.currentPage && this.currentPage > 0 && !props) {
