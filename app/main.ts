@@ -1,11 +1,13 @@
 import Vue from 'nativescript-vue';
 import App from './components/App.vue';
 import store from './services/store';
-import Notification from './services/notifications';
-import Firebase from './services/firebase';
+import firebase from './services/firebase';
 import routes from "./services/router";
 import Navigator from "nativescript-vue-navigator";
 import moment from 'moment';
+import { SnackBar, SnackBarOptions } from "@nstudio/nativescript-snackbar";
+const snackbar = new SnackBar();
+var clipboard = require("nativescript-clipboard");
 const appSettings = require("tns-core-modules/application-settings");
 
 import {
@@ -13,6 +15,7 @@ import {
   fonticon
 } from "nativescript-fonticon"; // require the couchbase module
 
+import Notification from './services/notifications';
 TNSFontIcon.debug = false;
 TNSFontIcon.paths = {
   mdi: "./assets/materialdesignicons.css"
@@ -35,32 +38,31 @@ Vue.registerElement(
 
 Vue.registerElement(
   'Ripple',
-   () => require("nativescript-ripple").Ripple
+  () => require("nativescript-ripple").Ripple
 );
 
 Vue.registerElement(
   'CardView',
-   () => require("@nstudio/nativescript-cardview").CardView
+  () => require("@nstudio/nativescript-cardview").CardView
 );
 
 Vue.registerElement(
   'MaterialDropdownList',
-   () => require("nativescript-materialdropdownlist").MaterialDropdownList
+  () => require("nativescript-materialdropdownlist").MaterialDropdownList
 );
 
-// Initialize our main class
-// Everything is done on the constructor soo dont stress
-if(!appSettings.getString("uniqueID")){
-  const GUID = 'xxx-xxx-4x'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-  });
-  appSettings.setString("uniqueID",GUID);
-}
+Vue.registerElement(
+  'MapView',
+  () => require('nativescript-google-maps-sdk').MapView
+);
 
-const firebase = new Firebase();
-firebase.init();
-const notification = new Notification(firebase);
+Vue.registerElement(
+  "MLKitBarcodeScanner",
+  () =>
+    require("nativescript-plugin-firebase/mlkit/barcodescanning")
+      .MLKitBarcodeScanner
+);
+
 Vue.use(Navigator, {
   routes
 });
@@ -68,24 +70,46 @@ Vue.use(Navigator, {
 Vue.prototype.$firebase = firebase;
 
 Vue.mixin({
-  data(){
+  data() {
     return {
-      uniqueID:appSettings.getString("uniqueID"),
+      uniqueID: appSettings.getString("uniqueID"),
       currentPage: 0,
-      victims:[],
-      isLoading:false
+      victims: [],
+      isLoading: false
     }
   },
-  mounted(){
+  mounted() {
     this.loadVictims();
   },
-  methods:{
-    loadVictims(){
+  methods: {
+    loadVictims() {
       store.commit("loadVictims");
       this.victims = store.state.victims;
     },
-    getMoment(value = null){
+    getMoment(value = null) {
       return moment(value)
+    },
+    copyToClipboard(text, successText = "copied to the clipboard") {
+      clipboard.setText(text).then(() => {
+        this.showSnackBar(successText);
+      })
+    },
+    showSnackBar(msg, actionText = 'ok', duration = 5000, callback = null) {
+      const options: SnackBarOptions = {
+        actionText: actionText,
+        actionTextColor: '#ff6d00',
+        snackText: msg,
+        textColor: '#c43c00',
+        hideDelay: duration,
+        backgroundColor: '#fff'
+      };
+
+      if (!callback) {
+        callback = function (arg) {
+
+        }
+      }
+      snackbar.action(options).then(callback);
     },
     navigate(to, props = null, options = null) {
       if (to == null) {
@@ -105,8 +129,8 @@ Vue.mixin({
         this.$navigator.navigate(to, options);
       }
     },
-    saveNewVictimLocally(userId,displayName){
-      store.commit("addVictim",{
+    saveNewVictimLocally(userId, displayName) {
+      store.commit("addVictim", {
         userId,
         displayName
       });

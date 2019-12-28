@@ -16,5 +16,14 @@
     "google_auth": false,
     "admob": false,
     "dynamic_links": false,
-    "ml_kit": false
+    "ml_kit": true,
+    "ml_kit_text_recognition": false,
+    "ml_kit_barcode_scanning": true,
+    "ml_kit_face_detection": false,
+    "ml_kit_image_labeling": false,
+    "ml_kit_object_detection": false,
+    "ml_kit_custom_model": false,
+    "ml_kit_natural_language_identification": false,
+    "ml_kit_natural_language_translation": false,
+    "ml_kit_natural_language_smartreply": false
 }

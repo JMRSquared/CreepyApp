@@ -1,8 +1,9 @@
 {
   "android": {
-    "v8Flags": "--expose_gc"
+    "v8Flags": "--expose_gc",
+    "markingMode": "none"
   },
   "main": "main",
   "name": "sinister",
-  "version": "1.0.0"
+  "version": "2.0.0"
 }

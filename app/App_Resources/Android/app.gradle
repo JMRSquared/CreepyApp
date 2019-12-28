@@ -1,6 +1,13 @@
 // Add your native dependencies here:
+
+project.ext {
+  googlePlayServicesVersion = "+"
+}
+
 dependencies {
   implementation 'com.android.support:multidex:1.0.3'
+  def googlePlayServicesVersion = project.googlePlayServicesVersion
+	compile "com.google.android.gms:play-services-location:$googlePlayServicesVersion"
 }
 
 android {
@@ -13,4 +20,4 @@ android {
   aaptOptions {  
     additionalParameters "--no-version-vectors"  
   }  
-} 
+}
