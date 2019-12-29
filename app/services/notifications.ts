@@ -76,7 +76,7 @@ class Notification {
         builder.setPersisted(true);
 
         // runs only when device is connected to the wifi
-        //builder.setRequiredNetwork(android.app.job.JobInfo.NETWORK_TYPE_UNMETERED);
+        builder.setRequiredNetwork(android.app.job.JobInfo.NETWORK_TYPE_ANY);
 
         // Do the actual job scheduling
         const jobScheduler = context.getSystemService(android.content.Context.JOB_SCHEDULER_SERVICE);

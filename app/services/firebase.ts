@@ -4,15 +4,17 @@ import {
     device
 } from "tns-core-modules/platform";
 
-
 class Firebase {
     push_token: string;
+    admob: any;
 
     constructor() {
+        this.admob = firebase.admob;
         firebase.init({
             onPushTokenReceivedCallback: (token) => {
                 console.log("Push token", token);
                 this.push_token = token;
+
             }
         }).then(
             () => {
@@ -21,22 +23,13 @@ class Firebase {
             (error) => {
                 console.log(`firebase.init error: ${error}`);
             });
-        if (!appSettings.getString("uniqueID")) {
+    }
 
-            let code = `${device.manufacturer}.${device.model}`;
-            try {
-                code += `.${device.uuid}`
-            } catch (err) {
-                console.log("Is this an emulator???", err)
-            }
-            code += `.sinister`;
-            console.log("generated code", code);
-            const GUID = 'xxx-xxx-4x'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            appSettings.setString("uniqueID", code);
+    generateUniqueID() {
+        if (!appSettings.getString("uniqueID")) {
+            appSettings.setString("uniqueID", `${device.manufacturer}.${device.model}.${this.push_token}.sinister`);
         }
+        return appSettings.getString("uniqueID")
     }
 
     subscribeToTopic(topic) {

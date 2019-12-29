@@ -14,8 +14,18 @@
               <SearchBar row="0" hint="App name..." v-model="appSearchPhrase" />
             </CardView>
             <StackLayout width="20%">
-              <Ripple @tap="showDeviceLocations" class="m-y-10 m-r-10" backgroundColor="white">
-                <Label :text="'mdi-map-marker' | fonticon" textAlignment="center" verticalAlignment="center" :fontSize="30" class="mdi m-10 text-dark-orange" />
+              <Ripple
+                @tap="showDeviceLocations"
+                class="m-y-10 m-r-10"
+                backgroundColor="white"
+              >
+                <Label
+                  :text="'mdi-map-marker' | fonticon"
+                  textAlignment="center"
+                  verticalAlignment="center"
+                  :fontSize="30"
+                  class="mdi m-10 text-dark-orange"
+                />
               </Ripple>
             </StackLayout>
           </StackLayout>
@@ -34,7 +44,12 @@
           <StackLayout class="bg-dark-orange">
             <CardView @tap="selectedAppName = null" elevation="10" margin="15">
               <GridLayout columns="*,auto">
-                <label class="p-5" :fontSize="18" verticalAlignment="center" :text="selectedAppName" />
+                <label
+                  class="p-5"
+                  :fontSize="18"
+                  verticalAlignment="center"
+                  :text="selectedAppName"
+                />
                 <Label
                   col="1"
                   :text="'mdi-close' | fonticon"
@@ -53,16 +68,14 @@
             verticalAlignment="center"
             textAlignment="center"
           />
-          <ListView 
+          <ListView
             @loadMoreItems="loadMoreMessages"
-            for="msg in allMessages[selectedAppName].filter(v => v && (JSON.stringify(v).toLowerCase().indexOf(appSearchInApp.toLowerCase()) >=0 || appSearchInApp.length < 2))" 
-            v-show="!isLoadingMessages" 
-            row="1">
+            for="msg in allMessages[selectedAppName].filter(v => v && (JSON.stringify(v).toLowerCase().indexOf(appSearchInApp.toLowerCase()) >=0 || appSearchInApp.length < 2))"
+            v-show="!isLoadingMessages"
+            row="1"
+          >
             <v-template class="">
-              <CardView
-                elevation="5"
-                class="m-10 p-10"
-              >
+              <CardView elevation="5" class="m-10 p-10">
                 <GridLayout rows="auto,auto,auto" columns="auto,*">
                   <label
                     rowSpan="3"
@@ -78,7 +91,13 @@
                     :textWrap="true"
                     :text="msg.title"
                   ></label>
-                  <label row="1" col="1" class="p-5" :textWrap="true" :text="msg.body"></label>
+                  <label
+                    row="1"
+                    col="1"
+                    class="p-5"
+                    :textWrap="true"
+                    :text="msg.body"
+                  ></label>
                   <label
                     row="2"
                     col="1"
@@ -98,7 +117,12 @@
             verticalAlignment="center"
             textAlignment="center"
           />
-          <CardView v-show="!isLoadingMoreMessages" row="2" elevation="10" margin="15">
+          <CardView
+            v-show="!isLoadingMoreMessages"
+            row="2"
+            elevation="10"
+            margin="15"
+          >
             <SearchBar row="0" hint="Search..." v-model="appSearchInApp" />
           </CardView>
         </GridLayout>
@@ -117,8 +141,8 @@ export default {
       selectedAppName: "",
       collectionNames: [],
       allMessages: {},
-      isLoadingMessages:false,
-      isLoadingMoreMessages:false
+      isLoadingMessages: false,
+      isLoadingMoreMessages: false
     };
   },
   props: ["victimID"],
@@ -147,27 +171,36 @@ export default {
       });
   },
   methods: {
-    showDeviceLocations(){
-      this.navigate("/device/locations",{
+    showDeviceLocations() {
+      this.navigate("/device/locations", {
         victimID: this.victimID
-      })
+      });
     },
-    loadMoreMessages(e){
-      if(this.appSearchInApp.length > 0 || this.isLoadingMoreMessages){
+    loadMoreMessages(e) {
+      if (this.appSearchInApp.length > 0 || this.isLoadingMoreMessages) {
         return;
       }
       const lastDoc = this.allMessages[this.selectedAppName];
-      const lastDocId = lastDoc && lastDoc.length > 0 && lastDoc[lastDoc.length -1].doc ? lastDoc[lastDoc.length -1].doc : null;
-      if(!lastDocId){
+      const lastDocId =
+        lastDoc && lastDoc.length > 0 && lastDoc[lastDoc.length - 1].doc
+          ? lastDoc[lastDoc.length - 1].doc
+          : null;
+      if (!lastDocId) {
         return;
       }
       this.isLoadingMoreMessages = true;
-       this.$firebase
-        .getMessagesFromCollection(this.victimID, this.selectedAppName,lastDocId)
+      this.$firebase
+        .getMessagesFromCollection(
+          this.victimID,
+          this.selectedAppName,
+          lastDocId
+        )
         .then(allDocs => {
           this.isLoadingMoreMessages = false;
-          if(allDocs && allDocs.length > 0){
-            this.allMessages[this.selectedAppName] = this.allMessages[this.selectedAppName].concat(allDocs);
+          if (allDocs && allDocs.length > 0) {
+            this.allMessages[this.selectedAppName] = this.allMessages[
+              this.selectedAppName
+            ].concat(allDocs);
           }
           console.log("All data is in", allDocs);
         })

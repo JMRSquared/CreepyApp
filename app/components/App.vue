@@ -62,12 +62,20 @@
               col="1"
             />
             <Label
-              text="Show my QR"
+              text="Tap me!"
               class="font-weight-bold t-18"
               row="1"
               col="1"
             />
           </GridLayout>
+          <Label
+            v-if="!uniqueID"
+            @tap="reloadUniqueID()"
+            text="Something is not right here, do you have internet connection?"
+            :textWrap="true"
+            class="m-5"
+            textAlignment="center"
+          ></Label>
           <GridLayout class="p-x-5 p-y-10" rows="auto" columns="*,auto">
             <Label
               class="drawer-item text-light-orange font-weight-bold"
@@ -150,19 +158,74 @@ import * as Permissions from "nativescript-permissions";
 import { Vibrate } from "nativescript-vibrate";
 const vibrate = new Vibrate();
 import { prompt } from "tns-core-modules/ui/dialogs";
+const appSettings = require("tns-core-modules/application-settings");
 
 export default {
   data() {
     return {
       msg: "Hello World!",
-      selectedVictim: null
+      selectedVictim: null,
+      adIsReady: false
     };
   },
   mounted() {
     console.log("Global vics", this.victims);
     this.selectedVictim = null;
+    this.loadAdMob();
+    if (!this.uniqueID) {
+      setTimeout(() => {
+        this.reloadUniqueID();
+      }, 5000);
+    }
   },
   methods: {
+    loadAdMob() {
+      this.$firebase.admob
+        .showBanner({
+          size: this.$firebase.admob.AD_SIZE.SMART_BANNER, // see firebase.admob.AD_SIZE for all options
+          margins: {
+            bottom: 10
+          },
+          androidBannerId: "ca-app-pub-4924835910036108/4611034320",
+          iosBannerId: "ca-app-pub-4924835910036108/4611034320",
+          testing: this.TNS_ENV !== "production", // when not running in production set this to true, Google doesn't like it any other way
+          iosTestDeviceIds: [],
+          keywords: ["business", "money", "cash", "rich", "free", "job", "work"] // add keywords for ad targeting
+        })
+        .then(
+          function() {
+            console.log("AdMob banner loaded");
+          },
+          function(errorMessage) {
+            console.log("AdMob banner error", errorMessage);
+          }
+        );
+      this.$firebase.admob
+        .preloadInterstitial({
+          iosInterstitialId: "ca-app-pub-4924835910036108/8316962154",
+          androidInterstitialId: "ca-app-pub-4924835910036108/8316962154",
+          testing: this.TNS_ENV !== "production", // when not running in production set this to true, Google doesn't like it any other way
+          iosTestDeviceIds: [],
+          onClosed: () => console.log("Interstitial closed"),
+          onClicked: () => console.log("Interstitial clicked"),
+          onOpened: () => console.log("Interstitial opened"),
+          onLeftApplication: () => console.log("Interstitial left application")
+        })
+        .then(
+          function() {
+            this.adIsReady = true;
+            console.log(
+              "AdMob interstitial preloaded, you can now call 'showInterstitial' at any time to show it without delay."
+            );
+          },
+          function(errorMessage) {
+            console.log("AdMob interstitial error", errorMessage);
+          }
+        );
+    },
+    reloadUniqueID() {
+      this.uniqueID = this.$firebase.generateUniqueID();
+    },
     copyUniqueId() {
       this.$showModal(ShowBarCode);
       this.copyToClipboard(
@@ -199,12 +262,22 @@ export default {
                 title: "Provide a display name to use",
                 okButtonText: "Save",
                 cancelButtonText: "Cancel"
-              }).then(displayName => {
+              }).then(async displayName => {
                 if (displayName && displayName.result) {
                   if (!displayName.text || displayName.text.length < 3) {
                     return alert("Provide a valid Display name");
                   }
+                  console.log("Is the ad ready???", this.adIsReady);
+                  if (this.adIsReady) {
+                    try {
+                      await this.$firebase.admob.showInterstitial();
+                    } catch (err) {
+                      console.log("Error loading ad", err);
+                    }
+                  }
                   this.saveNewVictimLocally(userID, displayName.text);
+                  this.loadVictims();
+                  this.$refs.drawer.nativeView.closeDrawer();
                   this.navigate("/notification/screen", {
                     victimID: userID
                   });
