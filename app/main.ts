@@ -2,6 +2,7 @@ import Vue from 'nativescript-vue';
 import App from './components/App.vue';
 import store from './services/store';
 import firebase from './services/firebase';
+import Notification from './services/notifications';
 import routes from "./services/router";
 import Navigator from "nativescript-vue-navigator";
 import moment from 'moment';
@@ -15,7 +16,6 @@ import {
   fonticon
 } from "nativescript-fonticon"; // require the couchbase module
 
-import Notification from './services/notifications';
 TNSFontIcon.debug = false;
 TNSFontIcon.paths = {
   mdi: "./assets/materialdesignicons.css"
@@ -47,11 +47,6 @@ Vue.registerElement(
 );
 
 Vue.registerElement(
-  'MaterialDropdownList',
-  () => require("nativescript-materialdropdownlist").MaterialDropdownList
-);
-
-Vue.registerElement(
   'MapView',
   () => require('nativescript-google-maps-sdk').MapView
 );
@@ -67,6 +62,7 @@ Vue.use(Navigator, {
   routes
 });
 
+Vue.prototype.$notification = new Notification();
 Vue.prototype.$firebase = firebase;
 
 Vue.mixin({

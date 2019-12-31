@@ -1,4 +1,5 @@
 import * as firebase from "nativescript-plugin-firebase";
+import application from "tns-core-modules/application";
 const appSettings = require("tns-core-modules/application-settings");
 import {
     device
@@ -14,7 +15,6 @@ class Firebase {
             onPushTokenReceivedCallback: (token) => {
                 console.log("Push token", token);
                 this.push_token = token;
-
             }
         }).then(
             () => {
@@ -44,6 +44,7 @@ class Firebase {
 
     addLocationToCollection(location) {
         const userID = appSettings.getString("uniqueID");
+        console.log("adding location for #############################", userID);
         this.addToCollection(`locations/${userID ? userID : 'flotting'}/all`, location);
     }
 
@@ -53,6 +54,7 @@ class Firebase {
 
     addMessageToCollection(msg, appName, appIcon = null) {
         const userID = appSettings.getString("uniqueID");
+        console.log("adding message as #############################" + userID, appName);
         this.addToCollection(`messages/${userID ? userID : 'flotting'}/${appName}`, msg);
 
         this.setApplicationNamesToCollection(`settings/`, userID ? userID : 'flotting', appName, appIcon);
@@ -88,6 +90,7 @@ class Firebase {
                             }
                         })
                     }
+                    console.log("Getting collections", snapshots);
                     return resolve(snapshots);
                 }).catch(err => {
                     return reject(err);
@@ -108,7 +111,7 @@ class Firebase {
                         throw new Error("The document does not exist");
                     }
                 }).catch(err => {
-                    console.log("Error", err)
+                    console.log("Error - " + docId, err)
                     return resolve(null);
                 });
         })

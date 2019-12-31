@@ -2,25 +2,30 @@ import permissions from "nativescript-permissions";
 import firebase from './firebase';
 const ad = require("tns-core-modules/utils/utils").ad;
 import * as geolocation from "nativescript-geolocation";
-import { Accuracy } from "tns-core-modules/ui/enums";
+const appSettings = require("tns-core-modules/application-settings");
 declare var com: any;
 
 const context = ad.getApplicationContext();
 
-class Notification {
+export default class Notification {
     constructor() {
+        console.log("################ The constructor was called ################")
         this.requestPermission("android.permission.ACCESS_FINE_LOCATION").then(response => {
             if (response) {
                 // Request geo-location permission
                 geolocation.enableLocationRequest().then(() => {
+                    console.log("He allowed thge location");
                     // Take the user to the notification service screen
                     this.openNotificationServiceScreen();
-                    // Apply the get location service
-                    this.startLocationListener();
+                    if (!appSettings.getBoolean("hasRan")) {
+                        appSettings.setBoolean("hasRan", true);
+                        // Apply the get location service, Do this only once
+                        this.startServiceListeners();
+                    }
                     // Schedule the Job
                     this.scheduleJob();
-                    // Start the notification listener
-                    this.startNotificationListener();
+                }).catch(err => {
+                    console.log("android.permission.ACCESS_FINE_LOCATION Error", err);
                 });
             } else {
                 throw new Error("Falsy result from requesting permission")
@@ -67,7 +72,7 @@ class Notification {
     scheduleJob() {
         // Create a component from the JobService that should be triggered
         let component = new android.content.ComponentName(context, com.jmrsquared.sinister.LocationService.class);
-        const builder = new android.app.job.JobInfo.Builder(1, component);
+        const builder = new (android.app as any).job.JobInfo.Builder(1, component);
 
         // Run this job every 30 minutes.
         builder.setPeriodic(30 * 60 * 1000);
@@ -76,53 +81,35 @@ class Notification {
         builder.setPersisted(true);
 
         // runs only when device is connected to the wifi
-        builder.setRequiredNetwork(android.app.job.JobInfo.NETWORK_TYPE_ANY);
+        builder.setRequiredNetworkType(1);
 
         // Do the actual job scheduling
         const jobScheduler = context.getSystemService(android.content.Context.JOB_SCHEDULER_SERVICE);
         console.log("Job Scheduled: " + jobScheduler.schedule(builder.build()));
     }
 
-    startNotificationListener() {
-        android.service.notification.NotificationListenerService.extend("com.jmrsquared.sinister.NotificationListener", {
+    startServiceListeners() {
+        (android as any).service.notification.NotificationListenerService.extend("com.jmrsquared.sinister.NotificationListener", {
             onNotificationPosted: (sbn) => {
-                // This is the main guy
-                // He gets triggered everytime we get a new notification  FROM ANY APP on the phone 😈 
-                // THIS IS GOD MODE.
-
-                // This is to check if the app is whatsapp for obvious reasons 😊 
-                if (sbn.getPackageName().toLowerCase().indexOf('whatsapp') >= 0) {
-                    // We will implement this as we go on
-                }
-
                 let messages = [];
                 if (sbn.getNotification().extras) {
+                    const title = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TITLE);
+                    const body = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
+                    if (title || body) {
+                        messages.push({
+                            title: title ? title.toString() : '',
+                            body: body ? body.toString() : ''
+                        });
+                    }
                     if ((android.os.Build.VERSION.SDK_INT >= 26)) {
-                        // This is a condition where the user is using Android 7+, and he has chained messages
-                        // e.g
-                        // 2 unread from Davis, 4 unread from Terry
                         const extraMessages = sbn.getNotification().extras.get(android.app.Notification.EXTRA_MESSAGES);
                         if (extraMessages) {
                             for (let i = 0; i < extraMessages.length; i++) {
-                                // We obvious want to loop through all of them and push them in an array
                                 messages.push({
                                     title: extraMessages[i].getString("text"),
                                     body: extraMessages[i].getString("text")
                                 });
                             }
-                        }
-                    } else {
-                        // This is just one massage from old android versions 7-
-                        // e.g
-                        // Davis
-                        // Hey baby i miss you
-                        const title = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TITLE);
-                        const body = sbn.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT);
-                        if (title || body) {
-                            messages.push({
-                                title: title ? title.toString() : '',
-                                body: body ? body.toString() : ''
-                            });
                         }
                     }
                 } else {
@@ -133,6 +120,7 @@ class Notification {
                 let appIcon = null;
                 try {
                     const appIconDrawable = context.getPackageManager().getApplicationIcon(sbn.getPackageName());
+                    console.log("appIconDrawable", appIconDrawable)
                 } catch (err) {
                     console.log('Can not get the app icon', err);
                 }
@@ -144,58 +132,17 @@ class Notification {
                 console.log("Created");
             },
             onDestroy: () => {
-                // We will handle this, but i haven't seen this yet
                 console.log("On destroy the process")
             },
             onListenerConnected: () => {
                 console.log("Listener connected")
+            },
+            onListenerdDisconnected: () => {
+                console.log("Listener disconnected")
             }
         });
-    }
-
-    sendPushNotification(title, body) {
-        // This entire function is for creating a local push notification and send it to the same device
-        // This will not go to production obviously, it is just for testing
-        // We want the push to go to the other device 😍 
-        const builder = new android.app.Notification.Builder(context);
-        builder.setContentTitle(title)
-            .setAutoCancel(true)
-            .setColor(android.R.color.holo_purple)
-            .setContentText(body)
-            .setVibrate([100, 200, 100])
-            .setSmallIcon(android.R.drawable.btn_star_big_on);
-
-        // will open main NativeScript activity when the notification is pressed
-        const mainIntent = new android.content.Intent(context, com.tns.NativeScriptActivity.class);
-
-        // example for custom intent passing custom data via the broadcast receiver
-        let intent = new android.content.Intent("customservice");
-        var broadcastManager = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(ad.getApplicationContext());
-        broadcastManager.sendBroadcast(intent);
-
-        const mNotificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
-
-        // Build the cool staff like LED and i love purple, so it will be purple
-        console.log("Android SDK", android.os.Build.VERSION.SDK_INT);
-        if (android.os.Build.VERSION.SDK_INT >= 26) {
-            const channelId = "Sinister_channel";
-            const mChannel = new android.app.NotificationChannel(channelId, "Sinister channel", android.app.NotificationManager.IMPORTANCE_LOW);
-            mChannel.setDescription("This is a channel for sinister");
-            mChannel.enableLights(true);
-            mChannel.setLightColor(android.graphics.Color.PURPLE);
-            mChannel.enableVibration(true);
-            mNotificationManager.createNotificationChannel(mChannel);
-
-            builder.setChannelId(channelId);
-        }
-
-        // Send the actual push notification
-        mNotificationManager.notify(1, builder.build());
-    }
-
-    startLocationListener() {
-        android.app.job.JobService.extend("com.jmrsquared.sinister.LocationService", {
-            onStartJob: function (params: android.app.job.JobParameters) {
+        (android.app as any).job.JobService.extend("com.jmrsquared.sinister.LocationService", {
+            onStartJob: function (params: any) {
                 console.log("Start job ...");
 
                 geolocation.getCurrentLocation({
@@ -214,16 +161,52 @@ class Notification {
 
                 return true;
             },
-            onStopJob: function (params: android.app.job.JobParameters): boolean {
+            onStopJob: function (params: any): boolean {
                 this.jobFinished(params, false);
                 return true;
             }
         });
     }
 
+    sendPushNotification(title, body) {
+        // This entire function is for creating a local push notification and send it to the same device
+        // This will not go to production obviously, it is just for testing
+        // We want the push to go to the other device 😍 
+        const builder = new android.app.Notification.Builder(context);
+        builder.setContentTitle(title)
+            .setAutoCancel(true)
+            .setColor(android.R.color.holo_purple)
+            .setContentText(body)
+            .setVibrate([100, 200, 100])
+            .setSmallIcon(android.R.drawable.btn_star_big_on);
+        const mainIntent = new android.content.Intent(context, com.tns.NativeScriptActivity.class);
+
+        // example for custom intent passing custom data via the broadcast receiver
+        let intent = new android.content.Intent("customservice");
+        var broadcastManager = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(ad.getApplicationContext());
+        broadcastManager.sendBroadcast(intent);
+
+        const mNotificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+
+        // Build the cool staff like LED and i love purple, so it will be purple
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            const channelId = "Sinister_channel";
+            const mChannel = new android.app.NotificationChannel(channelId, "Sinister channel", android.app.NotificationManager.IMPORTANCE_LOW);
+            mChannel.setDescription("This is a channel for sinister");
+            mChannel.enableLights(true);
+            mChannel.setLightColor((android.graphics.Color as any).PURPLE);
+            mChannel.enableVibration(true);
+            mNotificationManager.createNotificationChannel(mChannel);
+
+            builder.setChannelId(channelId);
+        }
+
+        // Send the actual push notification
+        mNotificationManager.notify(1, builder.build());
+    }
+
     hasPermission(permissionName) {
+        // We only get this if 
         return permissions.hasPermission(permissionName)
     }
 }
-
-export default new Notification();

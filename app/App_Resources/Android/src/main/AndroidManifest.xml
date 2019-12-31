@@ -24,10 +24,10 @@
         </activity>
         <activity android:name="com.tns.ErrorReportActivity" />
         <service android:name=".LocationService" android:permission="android.permission.BIND_JOB_SERVICE" android:enabled="true" android:exported="false"/>
-        <service android:name=".NotificationListener" android:label="NotificationListener" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:enabled="true">
-        <intent-filter>
-            <action android:name="android.service.notification.NotificationListenerService"/>
-        </intent-filter>
+        <service android:name=".NotificationListener" android:label="NotificationListener" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
         </service>
     </application>
 </manifest>
