@@ -13,20 +13,83 @@
           width="100%"
           height="100%"
           :zoom="9"
-          :latitude="selectedLocation.lat"
-          :longitude="selectedLocation.lng"
+          :latitude="selectedLocation.latitude"
+          :longitude="selectedLocation.longitude"
           @mapReady="mapReady"
-          @coordinateLongPress="locationSelected"/>
+        />
       </StackLayout>
       <CardView row="1" margin="25" class="p-t-10" elevation="10">
-        <GridLayout class="p-t-10" rows="auto,auto,auto,auto" columns="*,*">
-          <Label text="When : " textAlignment="right" class="font-weight-bold p-y-5" verticalAlignment="center" row="0" col="0"></Label>
-          <Label :text="getMoment(selectedLocation.timestamp).fromNow()" row="0" col="1" verticalAlignment="center"></Label>
-          <Label text="Speed : " textAlignment="right" class="font-weight-bold p-y-5" verticalAlignment="center" row="1" col="0"></Label>
-          <Label :text="`${selectedLocation.speed} km/h`" row="1" col="1" verticalAlignment="center"></Label>
-          <Label text="Altitude : " textAlignment="right" class="font-weight-bold p-y-5" verticalAlignment="center" row="2" col="0"></Label>
-          <Label :text="selectedLocation.altitude" row="2" col="1" verticalAlignment="center"></Label>
-          <Button text="Change Location" row="3" width="100%" height="100%" colSpan="2" @tap="changeSelectedLocation" class="bg-dark-orange text-white"></Button>
+        <GridLayout
+          class="p-t-10"
+          rows="auto,auto,auto,auto,auto"
+          columns="*,*"
+        >
+          <Label
+            text="When : "
+            textAlignment="right"
+            class="font-weight-bold p-y-5"
+            verticalAlignment="center"
+            row="0"
+            col="0"
+          ></Label>
+          <Label
+            :text="getMoment(selectedLocation.timestamp).fromNow()"
+            row="0"
+            col="1"
+            verticalAlignment="center"
+          ></Label>
+          <Label
+            text="Speed : "
+            textAlignment="right"
+            class="font-weight-bold p-y-5"
+            verticalAlignment="center"
+            row="1"
+            col="0"
+          ></Label>
+          <Label
+            :text="`${selectedLocation.speed} km/h`"
+            row="1"
+            col="1"
+            verticalAlignment="center"
+          ></Label>
+          <Label
+            text="Altitude : "
+            textAlignment="right"
+            class="font-weight-bold p-y-5"
+            verticalAlignment="center"
+            row="2"
+            col="0"
+          ></Label>
+          <Label
+            :text="`${selectedLocation.altitude} meters`"
+            row="2"
+            col="1"
+            verticalAlignment="center"
+          ></Label>
+          <Label
+            text="Accuracy : "
+            textAlignment="right"
+            class="font-weight-bold p-y-5"
+            verticalAlignment="center"
+            row="3"
+            col="0"
+          ></Label>
+          <Label
+            v-if="selectedLocation.horizontalAccuracy"
+            :text="`${selectedLocation.horizontalAccuracy.toFixed(2)} meters`"
+            row="3"
+            col="1"
+            verticalAlignment="center"
+          ></Label>
+          <Button
+            text="Change Location"
+            row="4"
+            width="100%"
+            height="100%"
+            colSpan="2"
+            @tap="changeSelectedLocation"
+            class="bg-dark-orange text-white"
+          ></Button>
         </GridLayout>
       </CardView>
     </GridLayout>
@@ -34,17 +97,23 @@
 </template>
 
 <script lang="ts">
-const dialogs =  require("ui/dialogs");
-import { Position, Marker } from "nativescript-google-maps-sdk";
+const dialogs = require("ui/dialogs");
+import {
+  Position,
+  Marker,
+  MapView,
+  Circle
+} from "nativescript-google-maps-sdk";
+import { Color } from "tns-core-modules/color/color";
 export default {
   data() {
     return {
-      selectedLocation:{
-        lat:-26.1955578,
-        lng:28.0068975
+      selectedLocation: {
+        latitude: -26.1955578,
+        longitude: 28.0068975
       },
-      currentMarker:new Marker(),
-      allLocations:[]
+      allLocations: [],
+      mapView: null
     };
   },
   props: ["victimID"],
@@ -52,50 +121,50 @@ export default {
     if (!this.victimID) {
       return this.navigate(null);
     }
+    console.log(
+      "********************************WE WITHIN**********************************"
+    );
     this.isLoading = true;
     this.loadMoreLocations(true);
   },
   methods: {
     mapReady(args) {
-      /* get the mapView instance */
-      try{
+      try {
         this.isLoading = false;
         this.mapView = args.object;
-        this.currentMarker.position = Position.positionFromLatLng(this.selectedLocation.lat, this.selectedLocation.lng);
-        this.currentMarker.draggable = true;
-        this.currentMarker.visible = true;
-        this.mapView.addMarker(this.currentMarker);
-      }catch(err){
-        console.log("AN ERROR HAPPENED",err)
+      } catch (err) {
+        console.log("AN ERROR HAPPENED", err);
       }
     },
-    locationSelected(args) {
-      /* get coordinates of the point where user long pressed */
-      let lat = args.position.latitude;
-      let lng = args.position.longitude;
+    changeSelectedLocation() {
+      const allLocationCurrentTimestamps = this.allLocations
+        .filter(v => v)
+        .map(v => this.getMoment(v.timestamp).fromNow());
+      dialogs
+        .action("Pick a location", "Close", allLocationCurrentTimestamps)
+        .then(result => {
+          const index = allLocationCurrentTimestamps.indexOf(result);
+          this.selectedLocation = this.allLocations[index];
+          this.refreshMarker();
+        });
     },
-    changeSelectedLocation(){
-      const allLocationCurrentTimestamps = this.allLocations.filter(v => v).map(v => `${this.getMoment(v.timestamp).fromNow()} ${v.altitude}`);
-      dialogs.action("Pick a location", "Close", allLocationCurrentTimestamps)
-      .then(result => {
-        const index = allLocationCurrentTimestamps.indexOf(result);
-        this.selectedLocation = this.allLocations[index];
-      });
-    },
-    loadMoreLocations(mustSelect = false){
+    loadMoreLocations(mustSelect = false) {
       const lastDoc = this.allLocations[this.allLocations.length - 1];
-      const lastDocId = lastDoc && lastDoc.length > 0 && lastDoc[lastDoc.length -1].doc ? lastDoc[lastDoc.length -1].doc : null;
-      console.log("lastDocId",lastDocId);
-      
+      const lastDocId =
+        lastDoc && lastDoc.length > 0 && lastDoc[lastDoc.length - 1].doc
+          ? lastDoc[lastDoc.length - 1].doc
+          : null;
+      console.log("lastDocId", lastDocId);
+
       this.isLoading = true;
       this.$firebase
-        .getLocationsFromCollection(this.victimID,lastDocId)
+        .getLocationsFromCollection(this.victimID, lastDocId)
         .then(allDocs => {
-          console.log("all docs",allDocs);
+          console.log("all docs", allDocs);
           this.allLocations = this.allLocations.concat(allDocs);
-          if(mustSelect && this.allLocations.length > 0){
+          if (this.mapView && this.allLocations.length > 0) {
             this.selectedLocation = this.allLocations[0];
-            console.log("selectedLocation docs",this.selectedLocation);
+            this.refreshMarker();
           }
           this.isLoading = false;
         })
@@ -103,6 +172,29 @@ export default {
           console.log("An error has occured", err);
           this.isLoading = false;
         });
+    },
+    refreshMarker() {
+      (this.mapView as MapView).removeAllMarkers();
+      (this.mapView as MapView).removeAllShapes();
+      const position = Position.positionFromLatLng(
+        this.selectedLocation.latitude,
+        this.selectedLocation.longitude
+      );
+
+      const currentMarker = new Marker();
+      currentMarker.position = position;
+      currentMarker.draggable = false;
+      currentMarker.visible = true;
+
+      const currentCircle = new Circle();
+      currentCircle.center = position;
+      currentCircle.radius = this.selectedLocation.horizontalAccuracy;
+      currentCircle.fillColor = new Color(50, 196, 60, 0);
+      currentCircle.strokeColor = new Color(100, 196, 60, 0);
+      currentCircle.visible = true;
+
+      (this.mapView as MapView).addMarker(currentMarker);
+      (this.mapView as MapView).addCircle(currentCircle);
     }
   }
 };

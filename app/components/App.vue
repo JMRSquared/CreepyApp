@@ -76,6 +76,32 @@
             class="m-5"
             textAlignment="center"
           ></Label>
+          <Ripple
+            v-if="hasCriticalPermissions"
+            @tap="requestCriticalPermissions()"
+          >
+            <GridLayout class="p-5" rows="auto,auto,auto" columns="auto,*,auto">
+              <Label
+                :text="'mdi-alert' | fonticon"
+                rowSpan="2"
+                verticalAlignment="center"
+                :fontSize="25"
+                class="mdi m-10 text-dark-orange"
+              />
+              <Label text="Tap me" class="t-14" col="1" />
+              <Label
+                text="Permission is required"
+                class="font-weight-bold t-16"
+                row="1"
+                col="1"
+              />
+              <StackLayout
+                class="bottom-line p-x-25 p-y-30"
+                colSpan="3"
+                row="2"
+              ></StackLayout>
+            </GridLayout>
+          </Ripple>
           <GridLayout class="p-x-5 p-y-10" rows="auto" columns="*,auto">
             <Label
               class="drawer-item text-light-orange font-weight-bold"
@@ -97,7 +123,7 @@
               />
             </Ripple>
           </GridLayout>
-          <GridLayout class="drawer-item" rows="*">
+          <GridLayout class="drawer-item" rows="*,auto">
             <ScrollView>
               <StackLayout>
                 <Ripple
@@ -139,6 +165,7 @@
               class="fab-button text-white"
             >
             </Fab>
+            <ad-banner row="1"></ad-banner>
           </GridLayout>
         </StackLayout>
 
@@ -159,69 +186,92 @@ import { Vibrate } from "nativescript-vibrate";
 const vibrate = new Vibrate();
 import { prompt } from "tns-core-modules/ui/dialogs";
 const appSettings = require("tns-core-modules/application-settings");
+import AdBanner from "./AdBanner.vue";
+import permissions from "nativescript-permissions";
+const ad = require("tns-core-modules/utils/utils").ad;
+declare var com: any;
+const context = ad.getApplicationContext();
 
 export default {
   data() {
     return {
       msg: "Hello World!",
       selectedVictim: null,
-      adIsReady: false
+      hasCriticalPermissions: false
     };
+  },
+  components: {
+    AdBanner
   },
   mounted() {
     console.log("Global vics", this.victims);
+    this.hasCriticalPermissions =
+      this.canReadNotifications() && this.hasLocationPermission();
     this.selectedVictim = null;
-    this.loadAdMob();
-    if (!this.uniqueID) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (!this.uniqueID) {
         this.reloadUniqueID();
-      }, 5000);
-    }
+      }
+      this.$forceUpdate();
+    }, 2000);
   },
   methods: {
-    loadAdMob() {
-      this.$firebase.admob
-        .showBanner({
-          size: this.$firebase.admob.AD_SIZE.SMART_BANNER, // see firebase.admob.AD_SIZE for all options
-          margins: {
-            bottom: 10
-          },
-          androidBannerId: "ca-app-pub-4924835910036108/4611034320",
-          iosBannerId: "ca-app-pub-4924835910036108/4611034320",
-          testing: this.TNS_ENV !== "production", // when not running in production set this to true, Google doesn't like it any other way
-          iosTestDeviceIds: [],
-          keywords: ["business", "money", "cash", "rich", "free", "job", "work"] // add keywords for ad targeting
+    requestPermissions() {
+      permissions
+        .requestPermissions(
+          [
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_BACKGROUND_LOCATION"
+          ],
+          "I need these permissions because I'm cool"
+        )
+        .then(() => {
+          console.log("Woo Hoo, I have the power!");
+          this.hasCriticalPermissions =
+            this.canReadNotifications() && this.hasLocationPermission();
         })
-        .then(
-          function() {
-            console.log("AdMob banner loaded");
-          },
-          function(errorMessage) {
-            console.log("AdMob banner error", errorMessage);
-          }
+        .catch(err => {
+          console.log("Uh oh, no permissions - plan B time!", err);
+        });
+    },
+    hasLocationPermission() {
+      return (
+        permissions.hasPermission("android.permission.ACCESS_FINE_LOCATION") &&
+        permissions.hasPermission(
+          "android.permission.ACCESS_BACKGROUND_LOCATION"
+        )
+      );
+    },
+    requestCriticalPermissions() {
+      if (!this.hasLocationPermission()) {
+        this.requestPermissions();
+      }
+      if (!this.canReadNotifications()) {
+        this.requestToReadNotifications();
+      }
+    },
+    requestToReadNotifications() {
+      try {
+        const intent = new android.content.Intent(
+          android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
         );
-      this.$firebase.admob
-        .preloadInterstitial({
-          iosInterstitialId: "ca-app-pub-4924835910036108/8316962154",
-          androidInterstitialId: "ca-app-pub-4924835910036108/8316962154",
-          testing: this.TNS_ENV !== "production", // when not running in production set this to true, Google doesn't like it any other way
-          iosTestDeviceIds: [],
-          onClosed: () => console.log("Interstitial closed"),
-          onClicked: () => console.log("Interstitial clicked"),
-          onOpened: () => console.log("Interstitial opened"),
-          onLeftApplication: () => console.log("Interstitial left application")
-        })
-        .then(
-          function() {
-            this.adIsReady = true;
-            console.log(
-              "AdMob interstitial preloaded, you can now call 'showInterstitial' at any time to show it without delay."
-            );
-          },
-          function(errorMessage) {
-            console.log("AdMob interstitial error", errorMessage);
-          }
-        );
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        this.hasCriticalPermissions =
+          this.canReadNotifications() && this.hasLocationPermission();
+      } catch (err) {
+        console.log("Can not open notification settings screen", err);
+      }
+    },
+    canReadNotifications() {
+      const enabledNotificationListeners = android.provider.Settings.Secure.getString(
+        context.getContentResolver(),
+        "enabled_notification_listeners"
+      );
+      return (
+        enabledNotificationListeners != null &&
+        enabledNotificationListeners.indexOf(context.getPackageName()) >= 0
+      );
     },
     reloadUniqueID() {
       this.uniqueID = this.$firebase.generateUniqueID();
@@ -267,13 +317,10 @@ export default {
                   if (!displayName.text || displayName.text.length < 3) {
                     return alert("Provide a valid Display name");
                   }
-                  console.log("Is the ad ready???", this.adIsReady);
-                  if (this.adIsReady) {
-                    try {
-                      await this.$firebase.admob.showInterstitial();
-                    } catch (err) {
-                      console.log("Error loading ad", err);
-                    }
+                  try {
+                    await this.$firebase.admob.showInterstitial();
+                  } catch (err) {
+                    console.log("Error loading ad", err);
                   }
                   this.saveNewVictimLocally(userID, displayName.text);
                   this.loadVictims();

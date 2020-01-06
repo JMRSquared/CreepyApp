@@ -9,7 +9,7 @@
     "performance_monitoring": false,
     "messaging": true,
     "in_app_messaging": false,
-    "crashlytics": false,
+    "crashlytics": true,
     "storage": false,
     "functions": false,
     "facebook_auth": false,

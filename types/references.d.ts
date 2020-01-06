@@ -7,6 +7,7 @@ declare module "vue/types/vue" {
         currentPage: number;
         $navigator: any;
         $firebase: any;
+        $crashlytics: any;
         navigate: any;
         victims: any[];
         showSnackBar: any;

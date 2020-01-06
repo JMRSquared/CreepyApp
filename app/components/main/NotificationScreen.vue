@@ -29,6 +29,35 @@
               </Ripple>
             </StackLayout>
           </StackLayout>
+          <StackLayout
+            row="1"
+            verticalAlignment="center"
+            textAlignment="center"
+            v-show="!isLoading && collectionNames.length == 0"
+          >
+            <label
+              verticalAlignment="center"
+              textAlignment="center"
+              class="mdi m-x-10 m-y-10"
+              fontSize="60%"
+              :text="'mdi-bell-off-outline' | fonticon"
+            ></label>
+            <label
+              verticalAlignment="center"
+              textAlignment="center"
+              class="m-20 font-weight-bold"
+              fontSize="22%"
+              text="No Notifications yet"
+            ></label>
+            <label
+              verticalAlignment="center"
+              textAlignment="center"
+              class="m-x-15"
+              fontSize="20%"
+              :textWrap="true"
+              text="Keep an eye, messages might start flowing anytime."
+            ></label>
+          </StackLayout>
           <ListView
             @itemTap="selectApp"
             class="m-x-15"
@@ -71,7 +100,7 @@
           <ListView
             @loadMoreItems="loadMoreMessages"
             for="msg in allMessages[selectedAppName].filter(v => v && (JSON.stringify(v).toLowerCase().indexOf(appSearchInApp.toLowerCase()) >=0 || appSearchInApp.length < 2))"
-            v-show="!isLoadingMessages"
+            v-show="!isLoadingMessages && allMessages.length > 0"
             row="1"
           >
             <v-template class="">

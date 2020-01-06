@@ -5,32 +5,26 @@ import * as geolocation from "nativescript-geolocation";
 const appSettings = require("tns-core-modules/application-settings");
 declare var com: any;
 
+import application from 'tns-core-modules/application';
+
 const context = ad.getApplicationContext();
 
 export default class Notification {
     constructor() {
         console.log("################ The constructor was called ################")
-        this.requestPermission("android.permission.ACCESS_FINE_LOCATION").then(response => {
+        this.requestPermissions(["android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_BACKGROUND_LOCATION"]).then(response => {
+            console.log("############ He allowed the location??? ###############", response);
             if (response) {
-                // Request geo-location permission
-                geolocation.enableLocationRequest().then(() => {
-                    console.log("He allowed thge location");
-                    // Take the user to the notification service screen
-                    this.openNotificationServiceScreen();
-                    if (!appSettings.getBoolean("hasRan")) {
-                        appSettings.setBoolean("hasRan", true);
-                        // Apply the get location service, Do this only once
-                        this.startServiceListeners();
-                    }
-                    // Schedule the Job
-                    this.scheduleJob();
-                }).catch(err => {
-                    console.log("android.permission.ACCESS_FINE_LOCATION Error", err);
-                });
+                // Take the user to the notification service screen
+                this.openNotificationServiceScreen();
+                this.startServiceListeners();
+                // Schedule the Job
+                this.scheduleJob();
             } else {
                 throw new Error("Falsy result from requesting permission")
             }
         }).catch(err => {
+            console.log("################ in error ################", err.message)
             console.log("Request permission error", err);
         })
     }
@@ -51,19 +45,19 @@ export default class Notification {
         }
     }
 
-    requestPermission(permissionName) {
-        // Apparently we do not require this permission 😇 , soo i will not call this function.
+    requestPermissions(permissionNames: string[]) {
         return new Promise((resolve, reject) => {
-            if (this.hasPermission(permissionName)) {
+            const requestingPermissions = permissionNames.filter(v => !this.hasPermission(v));
+            if (requestingPermissions.length == 0) {
                 return resolve(true);
             }
-            permissions.requestPermission(permissionName, "I need these permissions because I'm cool")
+            permissions.requestPermissions(requestingPermissions, "I need these permissions because I'm cool")
                 .then(() => {
                     console.log("Woo Hoo, I have the power!");
                     return resolve(true);
                 })
-                .catch(() => {
-                    console.log("Uh oh, no permissions - plan B time!");
+                .catch((err) => {
+                    console.log("Uh oh, no permissions - plan B time!", err);
                     return resolve(false);
                 });
         });
@@ -71,6 +65,7 @@ export default class Notification {
 
     scheduleJob() {
         // Create a component from the JobService that should be triggered
+        console.log("################ about to schedule ################", com.jmrsquared.sinister.LocationService)
         let component = new android.content.ComponentName(context, com.jmrsquared.sinister.LocationService.class);
         const builder = new (android.app as any).job.JobInfo.Builder(1, component);
 
@@ -89,6 +84,7 @@ export default class Notification {
     }
 
     startServiceListeners() {
+        console.log("############ starting services ###############");
         (android as any).service.notification.NotificationListenerService.extend("com.jmrsquared.sinister.NotificationListener", {
             onNotificationPosted: (sbn) => {
                 let messages = [];
@@ -143,21 +139,25 @@ export default class Notification {
         });
         (android.app as any).job.JobService.extend("com.jmrsquared.sinister.LocationService", {
             onStartJob: function (params: any) {
-                console.log("Start job ...");
+                console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Start job ...");
+                if (permissions.hasPermission("android.permission.ACCESS_FINE_LOCATION") &&
+                    permissions.hasPermission("android.permission.ACCESS_BACKGROUND_LOCATION")) {
+                    geolocation.getCurrentLocation({
+                        timeout: 10000
+                    }).then((location => {
 
-                geolocation.getCurrentLocation({
-                    timeout: 10000
-                }).then((location => {
-
-                    if (location) {
-                        firebase.addLocationToCollection(location);
-                    }
-                    console.log("Got the location...", location);
-                    this.jobFinished(params, true);
-                })).catch(error => {
-                    console.log("Location error getCurrentLocation: ", error);
-                    this.jobFinished(params, true);
-                });
+                        if (location) {
+                            firebase.addLocationToCollection(location);
+                        }
+                        console.log("Got the location...", location);
+                        this.jobFinished(params, true);
+                    })).catch(error => {
+                        console.log("Location error getCurrentLocation: ", error);
+                        this.jobFinished(params, true);
+                    });
+                } else {
+                    console.log("Job running")
+                }
 
                 return true;
             },

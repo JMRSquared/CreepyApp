@@ -65,6 +65,9 @@ Vue.use(Navigator, {
 Vue.prototype.$notification = new Notification();
 Vue.prototype.$firebase = firebase;
 
+import { crashlytics } from "nativescript-plugin-firebase";
+Vue.prototype.$crashlytics = crashlytics;
+
 Vue.mixin({
   data() {
     return {
