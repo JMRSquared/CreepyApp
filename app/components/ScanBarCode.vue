@@ -22,13 +22,15 @@
     >
       >
     </MLKitBarcodeScanner>
-    <label
-      v-if="txtError"
-      :textWrap="true"
-      class="p-5"
-      :text="txtError"
-      row="2"
-    ></label>
+    <CardView row="2" width="80%" elevation="10" margin="10">
+      <TextField
+        @textChange="submitTextEntry"
+        @returnPress="submitTextEntry"
+        v-model="txtEntry"
+        row="0"
+        hint="Token ..."
+      ></TextField>
+    </CardView>
     <Button
       class="p-5"
       col="1"
@@ -44,7 +46,7 @@ const appSettings = require("tns-core-modules/application-settings");
 export default {
   data() {
     return {
-      txtError: null
+      txtEntry: ""
     };
   },
   methods: {
@@ -56,6 +58,16 @@ export default {
         this.$modal.close("Invalid");
       } else if (found.length > 0) {
         this.$modal.close(found[0].value);
+      }
+    },
+    submitTextEntry(args) {
+      const value = this.txtEntry;
+
+      if (
+        value.length > 12 &&
+        value.indexOf("sinister") == value.replace("sinister", "").length
+      ) {
+        this.$modal.close(value);
       }
     }
   }

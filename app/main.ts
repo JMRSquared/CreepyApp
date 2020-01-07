@@ -58,6 +58,10 @@ Vue.registerElement(
       .MLKitBarcodeScanner
 );
 
+Vue.registerElement(
+  "AR", () => require("nativescript-ar").AR
+)
+
 Vue.use(Navigator, {
   routes
 });
@@ -134,6 +138,11 @@ Vue.mixin({
         displayName
       });
       this.victims = store.state.victims;
+    },
+    removeVictimLocally(victim) {
+      store.commit("removeVictim", victim);
+      this.victims = store.state.victims;
+
     }
   }
 });

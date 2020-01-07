@@ -61,7 +61,8 @@
             col="0"
           ></Label>
           <Label
-            :text="`${selectedLocation.altitude} meters`"
+            v-if="selectedLocation.altitude != null"
+            :text="`${selectedLocation.altitude.toFixed(2)} meters`"
             row="2"
             col="1"
             verticalAlignment="center"
@@ -75,7 +76,7 @@
             col="0"
           ></Label>
           <Label
-            v-if="selectedLocation.horizontalAccuracy"
+            v-if="selectedLocation.horizontalAccuracy != null"
             :text="`${selectedLocation.horizontalAccuracy.toFixed(2)} meters`"
             row="3"
             col="1"

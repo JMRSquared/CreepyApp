@@ -8,19 +8,28 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    victims:[]
+    victims: []
   },
   mutations: {
-    loadVictims(state){
+    loadVictims(state) {
       const documentID = appSettings.getString("USER_VICTIMS");
       const victims = storage.get(documentID);
       state.victims = victims ? victims : [];
     },
-    addVictim(state,obj){
+    addVictim(state, obj) {
       const documentID = appSettings.getString("USER_VICTIMS");
-      const newDocId = storage.add(obj,documentID);
-      if(!documentID){
-        appSettings.setString("USER_VICTIMS",newDocId);  
+      const newDocId = storage.add(obj, documentID);
+      if (!documentID) {
+        appSettings.setString("USER_VICTIMS", newDocId);
+      }
+      const victims = storage.get(documentID);
+      state.victims = victims ? victims : [];
+    },
+    removeVictim(state, obj) {
+      const documentID = appSettings.getString("USER_VICTIMS");
+      const newDocId = storage.remove(obj, documentID);
+      if (!documentID) {
+        appSettings.setString("USER_VICTIMS", newDocId);
       }
       const victims = storage.get(documentID);
       state.victims = victims ? victims : [];

@@ -125,12 +125,12 @@
           </GridLayout>
           <GridLayout class="drawer-item" rows="*,auto">
             <ScrollView>
-              <StackLayout>
-                <Ripple
-                  v-for="(victim, i) in victims"
-                  :key="i"
-                  @tap="goToNotificationScreen(victim)"
-                >
+              <GridLayout
+                v-for="(victim, i) in victims"
+                :key="i"
+                columns="*,auto"
+              >
+                <Ripple @tap="goToNotificationScreen(victim)">
                   <GridLayout
                     class="p-5"
                     rows="auto,auto,auto"
@@ -157,7 +157,16 @@
                     ></StackLayout>
                   </GridLayout>
                 </Ripple>
-              </StackLayout>
+                <Ripple @tap="removeVictim(victim)" col="1">
+                  <Label
+                    :text="'mdi-close' | fonticon"
+                    rowSpan="2"
+                    verticalAlignment="center"
+                    :fontSize="25"
+                    class="mdi m-10"
+                  />
+                </Ripple>
+              </GridLayout>
             </ScrollView>
             <Fab
               @tap="addNewVictim"
@@ -184,7 +193,7 @@ import ShowBarCode from "./ShowBarCode.vue";
 import * as Permissions from "nativescript-permissions";
 import { Vibrate } from "nativescript-vibrate";
 const vibrate = new Vibrate();
-import { prompt } from "tns-core-modules/ui/dialogs";
+import { prompt, confirm } from "tns-core-modules/ui/dialogs";
 const appSettings = require("tns-core-modules/application-settings");
 import AdBanner from "./AdBanner.vue";
 import permissions from "nativescript-permissions";
@@ -293,6 +302,19 @@ export default {
       this.$refs.drawer.nativeView.closeDrawer();
       this.navigate("/notification/screen", {
         victimID: victim.userId
+      });
+    },
+    removeVictim(victim) {
+      confirm({
+        title: "Are you sure?",
+        message: "The action can not be reverted",
+        okButtonText: "Remove user"
+      }).then(result => {
+        if (result) {
+          this.removeVictimLocally(victim);
+          this.$refs.drawer.nativeView.closeDrawer();
+          this.navigate("/home", {}, { clearHistory: true });
+        }
       });
     },
     async addNewVictim() {

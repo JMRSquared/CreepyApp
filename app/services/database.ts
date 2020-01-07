@@ -30,6 +30,21 @@ export default class Database {
         return this.db.createDocument(doc);
     }
 
+    remove(obj, documentId = null) {
+        if (documentId) {
+            console.log("removing", documentId);
+            const doc = this.db.getDocument(documentId);
+            if (doc) {
+                if (obj && obj.userId && doc.value.some(v => v.userId == obj.userId)) {
+                    doc.value = doc.value.filter(v => v.userId != obj.userId);
+                }
+                return this.db.updateDocument(documentId, doc);
+            }
+            return null;
+        }
+        return null;
+    }
+
     get(documentId) {
         if (!documentId) {
             return null;
