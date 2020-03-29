@@ -308,7 +308,8 @@ export default {
       confirm({
         title: "Are you sure?",
         message: "The action can not be reverted",
-        okButtonText: "Remove user"
+        okButtonText: "Remove user",
+        cancelButtonText: "cancel"
       }).then(result => {
         if (result) {
           this.removeVictimLocally(victim);

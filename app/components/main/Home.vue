@@ -1,17 +1,7 @@
 <template>
   <page class="bg-white" actionBarHidden="true">
-    <GridLayout class="page">
-      <AR
-        v-if="false"
-        debugLevel="FEATURE_POINTS"
-        :detectPlanes="true"
-        :planeMaterial="planeMaterial"
-        @planeTapped="onPlaneTapped"
-      >
-      </AR>
-    </GridLayout>
     <GridLayout
-      v-if="false && sentences"
+      v-if="sentences"
       class="p-t-10"
       rows="auto,*,auto,auto"
       columns="auto,*,auto"
@@ -127,16 +117,10 @@
 <script lang="ts">
 import { setInterval, clearInterval } from "tns-core-modules/timer";
 import { Color } from "tns-core-modules/color/color";
-import { AR } from "nativescript-ar";
 
 export default {
   data() {
     return {
-      planeMaterial: {
-        diffuse: new Color("white"),
-        transparency: 0.2
-      },
-      // AR
       txtPhrase: "",
       done: false,
       startTyping: false,
@@ -153,25 +137,6 @@ export default {
     };
   },
   methods: {
-    onPlaneTapped(args) {
-      const ar: AR = args.object;
-      console.log("We are within");
-      ar.addBox({
-        position: {
-          x: args.position.x,
-          y: args.position.y,
-          z: args.position.z
-        },
-        dimensions: {
-          x: 0.1,
-          y: 0.1,
-          z: 0.1
-        },
-        mass: 20,
-        materials: [new Color("blue")]
-      });
-    },
-    // AR code end code ends here .......
     onTyping(newVal) {
       if (!this.startTyping && newVal.length > 0) {
         this.startTyping = true;

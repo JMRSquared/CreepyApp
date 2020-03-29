@@ -58,10 +58,6 @@ Vue.registerElement(
       .MLKitBarcodeScanner
 );
 
-Vue.registerElement(
-  "AR", () => require("nativescript-ar").AR
-)
-
 Vue.use(Navigator, {
   routes
 });
